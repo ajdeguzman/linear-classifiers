@@ -169,10 +169,7 @@ button {
 }
 
 .env-panel {
-  position: fixed;
-  overflow-y: auto;
-  z-index: 1000;
-  max-height: 90vh;
+  display: none;
 }
 
 .env {

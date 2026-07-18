@@ -24,10 +24,6 @@ function TraceViewer() {
   const [error, setError] = useState(null);
   const [trace, setTrace] = useState(null);
 
-  // Add new state for position and offset
-  const [envPosition, setEnvPosition] = useState({ x: 20, y: 20 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   // Fetch trace from backend
   useEffect(() => {
@@ -99,42 +95,6 @@ function TraceViewer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [trace, targetStepIndex, targetLineNumber, rawMode, animateMode, navigate]);
 
-  // Update drag handlers
-  const handleMouseDown = (e) => {
-    if (e.target.closest('.env-panel')) {
-      const panel = e.target.closest('.env-panel');
-      const rect = panel.getBoundingClientRect();
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-      setIsDragging(true);
-      e.preventDefault();
-    }
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDragging) {
-      setEnvPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Add event listeners for dragging
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging]);
 
   // Not ready
   if (!tracePath) {
@@ -185,19 +145,9 @@ function TraceViewer() {
   const renderedLines = renderLines({trace, currentPath, currentLineNumber, currentStepIndex, targetStepIndex, rawMode, animateMode, navigate});
 
   return (
-    <div
-      className="trace-viewer-container"
-      onMouseDown={handleMouseDown}
-    >
+    <div className="trace-viewer-container">
       <div className="lines-panel">{renderedLines}</div>
-      <div
-        className="env-panel"
-        style={{
-          left: envPosition.x,
-          top: envPosition.y,
-          cursor: isDragging ? 'grabbing' : 'grab',
-        }}
-      >
+      <div className="env-panel">
         {renderedEnv}
       </div>
     </div>

@@ -521,7 +521,7 @@ def evaluation_metrics():
 
     text("### Confusion Matrix")
     text("| | Predicted −1 (No) | Predicted +1 (Yes) |\n|---|---|---|\n| **Actual −1** | TN (True Negative) | FP (False Positive) |\n| **Actual +1** | FN (False Negative) | TP (True Positive) |")
-
+    image("images/confusion_matrix.png", width=600)
     y_true = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]  # @inspect y_true
     y_pred = [1, 0, 1, 0, 0, 1, 1, 0, 0, 0]  # @inspect y_pred
 

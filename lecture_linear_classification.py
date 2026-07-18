@@ -286,7 +286,7 @@ def lda():
     link(fisher_1936)
     text("LDA is a statistical classification technique that works by **projection**.")
     text("It collapses high-dimensional data onto a single line, choosing the angle that maximizes class separation.")
-    image("images/pca_lda.webp", width=300)
+    image("images/pca_lda.webp", width=600)
     text("### Introduction")
     text("To deal with classification problems with 2 or more classes, most Machine Learning (ML) algorithms work the same way.")
     text("Usually, they apply some kind of transformation to the input data with the effect of **reducing the original input dimensions to a new (smaller) one**")

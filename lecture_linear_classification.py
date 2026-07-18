@@ -18,7 +18,7 @@ def main():
     perceptron()
     logistic_regression()
     linear_svm()
-    fishers_lda()
+    lda()
     evaluation_metrics()
     text("Next time: Neural networks — stacking linear classifiers with non-linearities.")
 
@@ -28,14 +28,12 @@ def main():
 def welcome():
     text("## Linear Classification Techniques")
     text("**Presenters**: AJ Barcelona, A De Guzman, J Gambito")
-    text("**Goal**: given labeled examples, learn a rule that assigns the correct class label to new inputs.")
-    text("**Why linear?** Simple, fast, interpretable — and the essential foundation before going deeper.")
-    text("This lecture walks through **4 core linear classifiers**, each with an analogy, worked math, and Python implementation.")
-
 
 ############################################################
 
 def what_is_classification():
+    text("### Recap:Supervised vs. Unsupervised Learning")
+    text("### Supervised Learning: Two broad categories")
     text("## Classification vs. Regression")
     text("**Regression** predicts a *continuous* value — e.g., predicting Alex Eala's score next match.")
     text("**Classification** predicts a *discrete class label* — e.g., spam or not-spam.")
@@ -51,13 +49,12 @@ def what_is_classification():
     text("Sentiment analysis is binary ('positive'/'negative') but becomes multiclass if we add 'neutral'.")
 
     text("### How classification works — five steps")
-    steps: list[str] = [
-        "Data Collection: gather labeled examples.",
-        "Feature Extraction: identify attributes that distinguish classes.",
-        "Model Training: learn patterns connecting features to labels.",
-        "Model Evaluation: test on unseen data to measure accuracy.",
-        "Prediction: classify new inputs using learned patterns.",
-    ]  # @inspect steps
+    steps: list[str] = []
+    steps.append("Data Collection: gather labeled examples.")        # @inspect steps
+    steps.append("Feature Extraction: identify attributes that distinguish classes.")  # @inspect steps
+    steps.append("Model Training: learn patterns connecting features to labels.")      # @inspect steps
+    steps.append("Model Evaluation: test on unseen data to measure accuracy.")        # @inspect steps
+    steps.append("Prediction: classify new inputs using learned patterns.")            # @inspect steps
 
 
 ############################################################
@@ -83,7 +80,7 @@ def linear_classification_overview():
         "Linear SVM",
         "Perceptron",
         "SGD Classifier",
-        "Fisher's LDA",
+        "LDA",
         "Ridge Classifier",
         "Passive-Aggressive Classifier",
         "Linear Discriminant Functions",
@@ -97,37 +94,6 @@ def linear_classification_overview():
         "Random Forests",
         "Multi-layer Neural Networks",
     ]  # @inspect nonlinear_examples
-
-    text("This lecture covers **four** of these in depth. The remaining four are briefly described below.")
-
-    text("### Ridge Classifier")
-    link(hoerl_kennard_1970)
-    text("Adapts **ridge regression** (least-squares with an L2 penalty) for classification by converting labels to $\\{-1, +1\\}$.")
-    text("The penalty $\\alpha \\sum w_j^2$ discourages large weights, preventing over-reliance on any single feature.")
-    text("*Analogy*: a cautious investor who refuses to put all funds into one stock — it spreads weight across many signals.")
-    text("Best used when features are correlated or noisy and you want to prevent overfitting.")
-
-    text("### Passive-Aggressive Classifier")
-    link(crammer_2006)
-    text("An **online learning** algorithm: processes one example at a time and reacts in two modes.")
-    text("- **Passive**: if the prediction is correct and confident, weights stay unchanged.")
-    text("- **Aggressive**: if the prediction is wrong, weights update immediately and strongly via the hinge loss.")
-    text("*Analogy*: a driving instructor who stays silent while you drive well, but grabs the wheel the instant you drift.")
-    text("Best used for streaming data where examples arrive one at a time (e.g., live news classification).")
-
-    text("### SGD Classifier")
-    text("Not a single algorithm — an **optimization framework** that can train any linear classifier by minimizing different loss functions.")
-    text("Instead of computing the full-dataset gradient before each update, it updates weights from **one random sample at a time**.")
-    text("- `loss='hinge'` → Linear SVM")
-    text("- `loss='log_loss'` → Logistic Regression")
-    text("*Analogy*: a blindfolded hiker who feels the slope under one foot and immediately steps that way, rather than mapping the entire mountain first.")
-    text("Best used for massive datasets that don't fit in memory.")
-
-    text("### Linear Discriminant Functions")
-    text("Assigns a **scoring formula** $g_k(x) = w_k^T x + b_k$ to each class $k$, then picks the class with the highest score:")
-    text("$$\\hat{y} = \\arg\\max_k\\, g_k(x)$$")
-    text("*Analogy*: a video game that runs three role-score formulas (Warrior, Mage, Rogue) and assigns your playstyle to whichever formula scores highest.")
-    text("Softmax regression is the probabilistic extension of this idea to multiple classes.")
 
 
 ############################################################
@@ -434,10 +400,10 @@ def linear_svm():
 
 
 ############################################################
-# 4. Fisher's LDA
+# 4. LDA
 
-def fishers_lda():
-    text("## 4. Fisher's Linear Discriminant Analysis (LDA)")
+def lda():
+    text("## 4. Linear Discriminant Analysis (LDA)")
     link(fisher_1936)
     text("LDA is a statistical classification technique that works by **projection**.")
     text("It collapses high-dimensional data onto a single line, choosing the angle that maximizes class separation.")
@@ -447,6 +413,8 @@ def fishers_lda():
     text("If the light comes from directly overhead, their floor shadows **overlap** — hard to tell apart.")
     text("If you move the light to side-level, the shadow clusters on the wall **separate clearly**.")
     text("LDA finds the perfect flashlight angle so that the shadows of both groups are cleanly separated.")
+
+    image("images/linearly-inseperable-data.png", width=600)
 
     text("### The Mathematical Concept — Fisher's Criterion")
     text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")

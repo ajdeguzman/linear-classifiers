@@ -429,8 +429,6 @@ def linear_svm():
     text("- **Positive margin boundary:** $x_1 + x_2 - 5 = +1 \\Rightarrow x_1 + x_2 = 6$")
     text("- **Negative margin boundary:** $x_1 + x_2 - 5 = -1 \\Rightarrow x_1 + x_2 = 4$")
     text("**Step 4:** Interpret — P2 lies on $x_1 + x_2 = 4$ and P3 lies on $x_1 + x_2 = 6$. Moving any other point leaves the boundary unchanged; moving a support vector shifts it.")
-
-    image("images/svm_3_2.png", width=600)
     text("### Live Demo — Linear SVM")
     code_cell("""
 import numpy as np

@@ -58,6 +58,11 @@ def code_cell(code: str):
     _current_renderings.append(Rendering(type="python_cell", data=code.strip()))
 
 
+def iframe(url: str, height: int = 800):
+    """Embed an HTML page as an inline iframe."""
+    _current_renderings.append(Rendering(type="iframe", data=url, style={"height": height}))
+
+
 def image(url: str, style: dict | None = None, width: int | str | None = None):
     """Show the image at `url`."""
     style = style or {}

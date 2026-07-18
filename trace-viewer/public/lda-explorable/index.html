@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>A Geometric Intuition for LDA</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel = "stylesheet" type = "text/css" href = "style.css" />
+	<script src="lib/two.min.js"></script>
+    <script src="lib/Tween.js"></script>
+    <script src="lib/papaparse.min.js"></script>
+    <script src="lib/versor.js"></script>
+    <script src="lib/numbers.min.js"></script>
+    <script src="lib/numeric-1.2.6.min.js"></script>
+    <script src="lib/threejs/three.js"></script>
+    <script src="lib/threejs/OrbitControls.js"></script>
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+  displayAlign: "left",
+  CommonHTML: { linebreaks: { automatic: true } }
+});
+MathJax.Hub.Register.StartupHook("End",function () { 
+	initAllContent();
+ });
+</script>
+	<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+    <script src="src/ThreePlotting.js"></script>
+    <script src="src/LDA.js"></script>
+    <script src="src/MathLibrary.js"></script>
+    <script src="src/main.js"></script>
+    <meta charset="UTF-8"> 
+</head>
+<body>
+<div class="article">
+	
+	<div id="projection-2d" class="figure" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);" ondrop="dropHandler(event);" data-initial-line='{"x":1, "y":0.001}'></div>
+	<p>The graph on the left is the original data, and the line on the right is what it would look like after we drop it 1 dimension by just ignoring the Y axis.</p>
+
+	<div id="projection-2d-2" class="figure" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);" ondrop="dropHandler(event);" data-initial-line='{"x":1, "y":0.001}'></div>
+	<h2>Higher Dimensions</h2>
+	<div id="container-3d" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);" ondrop="dropHandler(event);">
+		<canvas id="projection-3d" class="figure"></canvas>
+		<div id="projection-3d-2d" class="figure"></div>
+		<div style="clear:both"></div>
+	</div>
+	<p>What if we had 4D data that we couldn't even visualize? Below is what it looks projected down to 2D, (you can think of it as first projecting into 3D and then to 2D).</p>
+	<div id="container-4d" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);" ondrop="dropHandler(event);">
+		<div id="angles-4d" class="figure figure-left">
+			<ul>
+				<li>&alpha;<sub>XY</sub> &nbsp;= <input id="angle-xy" value="0"></input></li>
+				<li>&alpha;<sub>XZ</sub> &nbsp;= <input id="angle-xz" value="0"></input></li>
+				<li>&alpha;<sub>YZ</sub> &nbsp;= <input id="angle-yz" value="0"></input></li>
+				<li>&alpha;<sub>XW</sub> = <input id="angle-xw" value="0"></input></li>
+				<!-- 
+					The reason rotating along the YW has no visible effect is because
+					it's the same as rotating a line in 3D. One of the 3 rotations will be 
+					perpendicular to its axis, which doesn't change the line.
+				-->
+				<li style="display:none;">&alpha;<sub>YW</sub> = <input id="angle-yw" value="0"></input></li>
+				<li>&alpha;<sub>ZW</sub> = <input id="angle-zw" value="0"></input></li>
+			</ul>
+		</div>
+		<div id="projection-4d" class="figure figure-right"></div>
+		<div style="clear:both"></div>
+	</div>
+	<p>So what sort of formula can we come up with that would give us a high value for the projection below:</p>
+	<div id="good-separation" class="figure"></div>
+	<p>Compared to a low value for this projection:</p>
+	<div id="bad-separation" class="figure"></div>
+	<p>The simplest example of such a metric could be to simply compute the difference between the mean of each class in the reduced data. This works fairly well as a measure of how good the separation is in the above cases. But consider the case below, which I've constructed such that the mean of each class is the same as it is in the above dataset.</p>
+	<div id="high-variance" class="figure"></div>
+	
+	<p>Fisher's Linear Discriminant Formula:</p>
+	<p id="fisher-static">$$\frac{(\mu_1 - \mu_2)^2}{S_1 + S_2}$$</p>
+	<p>Where $\mu_i$ is the mean of class $i$. $S_i$ is the &ldquo;scatter&rdquo; of class $i$ and is defined as $S_i = \sum_{x\in Class_i} (x - \mu_i)^2$. It's a measure of how spread out the data is (by summing up how far each point is from the mean).</p>
+	<div id="container-formula" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);" ondrop="dropHandler(event);">
+		<div class="figure figure-left">
+			<div id="fisher-formula" class="fisher-equation">
+				<p>$$\frac{(\mu_1 - \mu_2)^2}{S_1 + S_2}$$</p>
+			</div>
+			<div id="fisher-formula-computed" class="fisher-equation">
+				<p>$$= \frac{(0.00 - 0.00)^2}{00 + 00}$$</p>
+			</div>
+			<div id="fisher-formula-result" class="fisher-equation">
+				<p>$$= 0$$</p>
+			</div>
+		</div>
+		<div id="projection-fisher" class="figure figure-right"></div>
+		<div style="clear:both"></div>
+	</div>
+	                            
+</div>
+</body>
+</html>

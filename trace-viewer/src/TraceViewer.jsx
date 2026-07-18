@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import hljs from 'highlight.js';
@@ -401,6 +401,11 @@ function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, t
     lineNumberToRenderings[getLast(step.stack).line_number] = step.renderings;
   }
 
+  // Set of line numbers that were actually traced (to hide triple-quoted string content)
+  const tracedLineNumbers = new Set(
+    trace.steps.map(step => getLast(step.stack).line_number)
+  );
+
   // Get the file contents that we're showing
   const fileContents = trace.files[currentPath];
 
@@ -429,9 +434,12 @@ function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, t
         </span>;
       });
       renderedItems.push(<div key="renderings" className="renderings">{renderedRenderings}</div>);
-    } else {
+    } else if (rawMode || tracedLineNumbers.has(lineNumber)) {
       // Note: line is HTML for syntax highlighting
       renderedItems.push(<span key="code" className="code-container" dangerouslySetInnerHTML={{ __html: line }} />);
+    } else {
+      // Untraced lines (e.g., inside triple-quoted strings) — hide completely
+      return null;
     }
 
     const lineNumberSpan = (
@@ -745,6 +753,25 @@ _out = _stdout.getvalue()
   );
 }
 
+function IframeEmbed({ src, initialHeight }) {
+  const ref = useRef(null);
+  const handleLoad = () => {
+    if (!ref.current) return;
+    try {
+      const h = ref.current.contentDocument.body.scrollHeight;
+      if (h > 0) ref.current.style.height = (h + 40) + 'px';
+    } catch (_) {}
+  };
+  return (
+    <iframe
+      ref={ref}
+      src={src}
+      style={{ width: '100%', height: initialHeight ? initialHeight + 'px' : '800px', border: 'none', display: 'block' }}
+      onLoad={handleLoad}
+    />
+  );
+}
+
 function renderRendering(rendering, navigate) {
   if (rendering.type === "markdown") {
     return <MarkdownRenderer content={rendering.data.toString()} style={rendering.style} />;
@@ -752,6 +779,8 @@ function renderRendering(rendering, navigate) {
     return <img src={rendering.data} style={rendering.style} />;
   } else if (rendering.type === "python_cell") {
     return <PythonCell code={rendering.data} />;
+  } else if (rendering.type === "iframe") {
+    return <IframeEmbed src={rendering.data} initialHeight={rendering.style?.height} />;
   } else if (rendering.type === "link") {
     if (rendering.internal_link) {
       // Create a link to a particular path, line number

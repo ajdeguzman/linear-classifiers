@@ -2,7 +2,7 @@ import math
 import random
 from dataclasses import dataclass
 
-from execute_util import link, image, text, code_cell
+from execute_util import link, image, text, code_cell, iframe
 from lecture_util import article_link, youtube_link
 from references_linclass import (
     rosenblatt_1958, novikoff_1962, minsky_papert_1969,
@@ -118,6 +118,9 @@ def lda():
     text("### What is dimensionality and what is dimensionality reduction?")
     image("images/dimensionality_reduction.webp", width=600)
     image("images/dimensionality_reduction_2.webp", width=600)
+    text("### Geometric Intuition")
+    text("Example: Houses on the market with price, age, size, distance to public transport and number of rooms")
+    iframe("lda-explorable/index.html", height=800)
     text("### The Mathematical Concept — Fisher's Criterion")
     text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")
     text("$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$")

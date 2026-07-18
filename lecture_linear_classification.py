@@ -38,12 +38,11 @@ def what_is_classification():
     text("**Regression** predicts a *continuous* value — e.g., predicting Alex Eala's score next match.")
     text("**Classification** predicts a *discrete class label* — e.g., spam or not-spam.")
     text("### Binary Classification")
-    text("Two classes: output is 0 or 1 (Yes/No, Pass/Fail).")
-    text("Examples: email spam filter, bank loan approval, medical risk flagging.")
-    text("Common binary algorithms: Logistic Regression, k-NN, Decision Trees, SVM, Naïve Bayes.")
+    text("**Two classes:** output is 0 or 1 (Yes/No, Pass/Fail).")
+    text("**Examples:** email spam filter, bank loan approval, medical risk flagging.")
 
     text("### Multiclass Classification")
-    text("More than two classes: news categories, book subjects, student streams.")
+    text("**More than two classes:** news categories, book subjects, student streams.")
     text("A problem can be binary *or* multiclass depending on how we define the classes.")
     text("Sentiment analysis is binary ('positive'/'negative') but becomes multiclass if we add 'neutral'.")
 

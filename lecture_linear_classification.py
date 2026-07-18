@@ -521,19 +521,72 @@ def evaluation_metrics():
 
     text("### Confusion Matrix")
     text("| | Predicted −1 (No) | Predicted +1 (Yes) |\n|---|---|---|\n| **Actual −1** | TN (True Negative) | FP (False Positive) |\n| **Actual +1** | FN (False Negative) | TP (True Positive) |")
-    image("images/confusion_matrix.png", width=600)
-    y_true = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]  # @inspect y_true
-    y_pred = [1, 0, 1, 0, 0, 1, 1, 0, 0, 0]  # @inspect y_pred
+    
+    text("### Live Demo — Confusion Matrix & Metrics")
+    code_cell("""
+import numpy as np
+import matplotlib.pyplot as plt
 
-    def confusion_matrix(yt: list[int], yp: list[int]) -> dict[str, int]:
-        tp = sum(1 for a, b in zip(yt, yp) if a == 1 and b == 1)
-        tn = sum(1 for a, b in zip(yt, yp) if a == 0 and b == 0)
-        fp = sum(1 for a, b in zip(yt, yp) if a == 0 and b == 1)
-        fn = sum(1 for a, b in zip(yt, yp) if a == 1 and b == 0)
-        return {"TP": tp, "TN": tn, "FP": fp, "FN": fn}
+# ── Edit these to experiment ─────────────────────────────────
+y_true = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]
+y_pred = [1, 0, 1, 0, 0, 1, 1, 0, 0, 0]
+# ─────────────────────────────────────────────────────────────
 
-    cm = confusion_matrix(y_true, y_pred)  # @inspect cm
+yt = np.array(y_true)
+yp = np.array(y_pred)
 
+TP = int(((yt == 1) & (yp == 1)).sum())
+TN = int(((yt == 0) & (yp == 0)).sum())
+FP = int(((yt == 0) & (yp == 1)).sum())
+FN = int(((yt == 1) & (yp == 0)).sum())
+
+prec = TP / (TP + FP) if (TP + FP) > 0 else 0.0
+rec  = TP / (TP + FN) if (TP + FN) > 0 else 0.0
+f1   = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
+acc  = (TP + TN) / len(yt)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
+
+# ── Left: confusion matrix heatmap ───────────────────────────
+cm_arr = np.array([[TN, FP], [FN, TP]])
+ax1.imshow(cm_arr, cmap='Blues', vmin=0, vmax=max(cm_arr.max(), 1))
+ax1.set_xticks([0, 1])
+ax1.set_yticks([0, 1])
+ax1.set_xticklabels(['Predicted 0 (Neg)', 'Predicted 1 (Pos)'], fontsize=10)
+ax1.set_yticklabels(['Actual 0 (Neg)', 'Actual 1 (Pos)'], fontsize=10)
+ax1.set_xlabel('Predicted Label', fontsize=11)
+ax1.set_ylabel('Actual Label', fontsize=11)
+cell_names = [['TN', 'FP'], ['FN', 'TP']]
+thresh = max(cm_arr.max() / 2.0, 1)
+for i in range(2):
+    for j in range(2):
+        txt_color = 'white' if cm_arr[i, j] >= thresh else 'black'
+        ax1.text(j, i, f'{cell_names[i][j]}\\n{cm_arr[i, j]}',
+                 ha='center', va='center', fontsize=14,
+                 fontweight='bold', color=txt_color)
+ax1.set_title('Confusion Matrix', fontsize=13, fontweight='bold')
+
+# ── Right: metrics bar chart ──────────────────────────────────
+bar_labels  = ['Precision', 'Recall', 'F1', 'Accuracy']
+bar_values  = [prec, rec, f1, acc]
+bar_colors  = ['steelblue', 'tomato', 'seagreen', 'mediumpurple']
+bars = ax2.bar(bar_labels, bar_values, color=bar_colors, alpha=0.85, edgecolor='black')
+for bar, val in zip(bars, bar_values):
+    ax2.text(bar.get_x() + bar.get_width() / 2, val + 0.02, f'{val:.2f}',
+             ha='center', fontsize=11, fontweight='bold')
+ax2.set_ylim(0, 1.15)
+ax2.set_title('Evaluation Metrics', fontsize=13, fontweight='bold')
+ax2.grid(True, alpha=0.3, axis='y')
+
+plt.tight_layout()
+plt.show()
+
+print(f"TP={TP}  TN={TN}  FP={FP}  FN={FN}")
+print(f"Precision : {prec:.4f}")
+print(f"Recall    : {rec:.4f}")
+print(f"F1        : {f1:.4f}")
+print(f"Accuracy  : {acc:.4f}")
+""")
     text("### Precision, Recall, F1")
     text("**Precision**: of all predicted positives, how many were truly positive?")
     text("$$\\text{Precision} = \\frac{TP}{TP + FP}$$")
@@ -541,17 +594,13 @@ def evaluation_metrics():
     text("$$\\text{Recall} = \\frac{TP}{TP + FN}$$")
     text("**F1**: harmonic mean of precision and recall.")
     text("$$F_1 = 2 \\cdot \\frac{\\text{Precision} \\times \\text{Recall}}{\\text{Precision} + \\text{Recall}}$$")
-
-    prec = cm["TP"] / (cm["TP"] + cm["FP"]) if (cm["TP"] + cm["FP"]) > 0 else 0.0  # @inspect prec
-    rec  = cm["TP"] / (cm["TP"] + cm["FN"]) if (cm["TP"] + cm["FN"]) > 0 else 0.0  # @inspect rec
-    f1   = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0               # @inspect f1
-    acc  = (cm["TP"] + cm["TN"]) / len(y_true)                                       # @inspect acc
-
     text("### When to use each metric")
     text("- **Precision** matters when false positives are costly (spam filter — don't block real emails).")
     text("- **Recall** matters when false negatives are costly (disease screening — don't miss sick patients).")
     text("- **F1** balances both; useful with imbalanced class distributions.")
     text("- **Accuracy** works when classes are balanced and all errors equally bad.")
+
+    
 
     text("### Algorithm Quick Reference — Covered in Depth")
     text("| Algorithm | Analogy | Output | Best For |\n|---|---|---|---|\n| Perceptron | Strict Club Bouncer | Hard Binary | Simple binary tasks |\n| Logistic Regression | Weather Forecaster | Probability | When confidence matters |\n| Linear SVM | Highway Construction | Margin Distance | Maximizing safety and generalization |\n| Fisher's LDA | Flashlights & Shadows | 1D Projection | Statistical group separation |")

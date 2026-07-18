@@ -68,18 +68,18 @@ def linear_classification_overview():
     text("- $b$ = bias (baseline offset)")
 
     text("### Decision rule")
-    text("If $\\text{score}(x) > 0$ → **Class A**.")
-    text("If $\\text{score}(x) < 0$ → **Class B**.")
+    text("If $\\text{score}(x) >= 75$ → **Class A**.")
+    text("If $\\text{score}(x) <  75$ → **Class B**.")
     text("The boundary where score = 0 is called the **Decision Boundary** (a hyperplane).")
 
     text("### Linear vs. Non-linear Classifiers")
     text("**Linear** classifiers draw a straight boundary — fast, interpretable, great for large datasets:")
     linear_examples: list[str] = [
-        "Logistic Regression",
-        "Linear SVM",
-        "Perceptron",
-        "SGD Classifier",
         "LDA",
+        "Logistic Regression",
+        "Perceptron",
+        "Linear SVM",
+        "SGD Classifier",
         "Ridge Classifier",
         "Passive-Aggressive Classifier",
         "Linear Discriminant Functions",
@@ -254,14 +254,6 @@ def perceptron():
     text("$$z = (1)(x_1) + (1)(x_2) + (-1.5)$$")
 
     text("**Step 2:** Substitute each row's feature values and apply the step function.")
-    z1 = w1_and * and_data[0][0] + w2_and * and_data[0][1] + b_and  # @inspect z1
-    y1 = 1 if z1 >= 0 else 0  # @inspect y1
-    z2 = w1_and * and_data[1][0] + w2_and * and_data[1][1] + b_and  # @inspect z2
-    y2 = 1 if z2 >= 0 else 0  # @inspect y2
-    z3 = w1_and * and_data[2][0] + w2_and * and_data[2][1] + b_and  # @inspect z3
-    y3 = 1 if z3 >= 0 else 0  # @inspect y3
-    z4 = w1_and * and_data[3][0] + w2_and * and_data[3][1] + b_and  # @inspect z4
-    y4 = 1 if z4 >= 0 else 0  # @inspect y4
     image("images/perceptron_example1_2.png", width=600)
 
     text("**Step 3:** Separate the classes.")
@@ -278,47 +270,6 @@ def perceptron():
     text("$$w_{i,\\text{new}} = w_{i,\\text{old}} + \\eta(t - y) \\cdot x_i$$")
     text("$$b_{\\text{new}} = b_{\\text{old}} + \\eta(t - y)$$")
     image("images/perceptron_example2.png", width=600)
-
-    def perceptron_predict(params: PerceptronParams, x: list[float]) -> int:
-        score = dot(params.weights, x) + params.bias  # @inspect score
-        return 1 if score >= 0 else 0
-
-    def perceptron_update(params: PerceptronParams, x: list[float], t: int) -> PerceptronParams:
-        y_hat = perceptron_predict(params, x)  # @inspect y_hat
-        if y_hat == t:
-            return params
-        new_weights = [w + eta * (t - y_hat) * xi for w, xi in zip(params.weights, x)]  # @inspect new_weights
-        new_bias = params.bias + eta * (t - y_hat)                                        # @inspect new_bias
-        return PerceptronParams(weights=new_weights, bias=new_bias)
-
-    def run_perceptron_training(train_data, params, num_epochs):
-        converged_epoch = num_epochs
-        for epoch in range(num_epochs):
-            errors = 0
-            for x, t in train_data:
-                params = perceptron_update(params, x, t)
-                if perceptron_predict(params, x) != t:
-                    errors += 1
-            if errors == 0:
-                converged_epoch = epoch + 1
-                break
-        return params, converged_epoch
-
-    train_data: list[tuple[list[float], int]] = [
-        ([0.0, 0.0], 0),
-        ([0.0, 1.0], 0),
-        ([1.0, 0.0], 0),
-        ([1.0, 1.0], 1),
-    ]  # @inspect train_data
-
-    eta = 1.0  # @inspect eta
-    params = PerceptronParams(weights=[0.0, 0.0], bias=0.0)  # @inspect params
-    num_epochs = 20  # @inspect num_epochs
-
-    params, converged_epoch = run_perceptron_training(train_data, params, num_epochs)  # @stepover @inspect converged_epoch
-
-    final_weights = params.weights  # @inspect final_weights
-    final_bias    = params.bias     # @inspect final_bias
 
     text("### Live Demo — Perceptron Training")
     code_cell("""
@@ -438,7 +389,7 @@ def linear_svm():
     w1_svm = 1.0   # @inspect w1_svm
     w2_svm = 1.0   # @inspect w2_svm
     b_svm  = -5.0  # @inspect b_svm
-
+    image("images/svm_1_1.png", width=600)
     text("**Step 2:** Substitute each point's feature values and apply the sign function.")
     f_p1 = w1_svm * svm_points[0][1] + w2_svm * svm_points[0][2] + b_svm  # @inspect f_p1
     y_p1 = 1 if f_p1 >= 0 else -1  # @inspect y_p1
@@ -449,6 +400,7 @@ def linear_svm():
     f_p4 = w1_svm * svm_points[3][1] + w2_svm * svm_points[3][2] + b_svm  # @inspect f_p4
     y_p4 = 1 if f_p4 >= 0 else -1  # @inspect y_p4
 
+    image("images/svm_1_23.png", width=600)
     text("**Step 3:** Separate the classes.")
     text("The decision boundary is $x_1 + x_2 - 5 = 0$, or rewritten as $x_2 = 5 - x_1$.")
     text("The **sign** of $f(x)$ determines the label: $f(x) < 0 \\Rightarrow -1$, $f(x) > 0 \\Rightarrow +1$.")
@@ -460,12 +412,14 @@ def linear_svm():
     fm_p2 = svm_points[1][3] * f_p2  # @inspect fm_p2
     fm_p3 = svm_points[2][3] * f_p3  # @inspect fm_p3
     fm_p4 = svm_points[3][3] * f_p4  # @inspect fm_p4
+    image("images/svm_2_1.png", width=600)
     text("**Step 2:** Interpret — P2 ($y \\times f = 1$) and P3 ($y \\times f = 1$) are the **support vectors**. P1 and P4 are far inside the safe zone.")
 
     text("### Example 3: Computing the Margin Width")
     text("**Step 1:** Compute the norm of the weight vector:")
     text("$$\\|w\\| = \\sqrt{w_1^2 + w_2^2} = \\sqrt{1^2 + 1^2} = \\sqrt{2} \\approx 1.414$$")
     norm_w = math.sqrt(w1_svm**2 + w2_svm**2)  # @inspect norm_w
+    image("images/svm_3_1.png", width=600)
 
     text("**Step 2:** Apply the margin formula:")
     text("$$\\text{Margin width} = \\frac{2}{\\|w\\|} = \\frac{2}{\\sqrt{2}} \\approx 1.414$$")
@@ -476,6 +430,7 @@ def linear_svm():
     text("- **Negative margin boundary:** $x_1 + x_2 - 5 = -1 \\Rightarrow x_1 + x_2 = 4$")
     text("**Step 4:** Interpret — P2 lies on $x_1 + x_2 = 4$ and P3 lies on $x_1 + x_2 = 6$. Moving any other point leaves the boundary unchanged; moving a support vector shifts it.")
 
+    image("images/svm_3_2.png", width=600)
     text("### Live Demo — Linear SVM")
     code_cell("""
 import numpy as np

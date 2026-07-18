@@ -652,11 +652,106 @@ function renderAuthors(authors) {
   }
 }
 
+// Shared Pyodide instance — loaded once, reused across all cells
+let _pyodidePromise = null;
+function getPyodide() {
+  if (!_pyodidePromise) {
+    _pyodidePromise = (async () => {
+      if (!window.loadPyodide) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js';
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      const py = await window.loadPyodide();
+      await py.loadPackage(['numpy', 'matplotlib']);
+      return py;
+    })();
+  }
+  return _pyodidePromise;
+}
+
+function PythonCell({ code }) {
+  const [cellCode, setCellCode] = useState(code);
+  const [status, setStatus] = useState('idle');
+  const [output, setOutput] = useState('');
+  const [plots, setPlots] = useState([]);
+
+  const run = async () => {
+    setStatus('loading');
+    setOutput('');
+    setPlots([]);
+    try {
+      const py = await getPyodide();
+      setStatus('running');
+      py.runPython(`
+import sys, io, base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.close('all')
+_stdout = io.StringIO()
+sys.stdout = _stdout
+`);
+      py.runPython(cellCode);
+      py.runPython(`
+import matplotlib.pyplot as plt
+_figs = []
+for _n in plt.get_fignums():
+    _fig = plt.figure(_n)
+    _buf = io.BytesIO()
+    _fig.savefig(_buf, format='png', bbox_inches='tight', dpi=100)
+    _buf.seek(0)
+    _figs.append(base64.b64encode(_buf.read()).decode())
+plt.close('all')
+sys.stdout = sys.__stdout__
+_out = _stdout.getvalue()
+`);
+      setPlots(py.globals.get('_figs').toJs());
+      setOutput(py.globals.get('_out'));
+      setStatus('done');
+    } catch (e) {
+      setOutput(String(e));
+      setStatus('error');
+    }
+  };
+
+  const rows = cellCode.split('\n').length + 1;
+  const btnLabel = status === 'loading' ? '⏳ Loading Pyodide...'
+                 : status === 'running' ? '⏳ Running...'
+                 : '▶ Run';
+
+  return (
+    <div className="python-cell">
+      <div className="python-cell-header">
+        <span className="python-cell-label">Python</span>
+        <button className="python-cell-run" onClick={run}
+                disabled={status === 'loading' || status === 'running'}>
+          {btnLabel}
+        </button>
+      </div>
+      <textarea className="python-cell-code" value={cellCode} rows={rows}
+                onChange={e => setCellCode(e.target.value)} spellCheck={false} />
+      {(output || plots.length > 0) && (
+        <div className="python-cell-output">
+          {output && <pre className={`python-cell-stdout${status === 'error' ? ' python-cell-error' : ''}`}>{output}</pre>}
+          {plots.map((b64, i) => <img key={i} src={`data:image/png;base64,${b64}`} style={{maxWidth:'100%'}} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function renderRendering(rendering, navigate) {
   if (rendering.type === "markdown") {
     return <MarkdownRenderer content={rendering.data.toString()} style={rendering.style} />;
   } else if (rendering.type === "image") {
     return <img src={rendering.data} style={rendering.style} />;
+  } else if (rendering.type === "python_cell") {
+    return <PythonCell code={rendering.data} />;
   } else if (rendering.type === "link") {
     if (rendering.internal_link) {
       // Create a link to a particular path, line number

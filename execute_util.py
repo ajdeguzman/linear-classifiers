@@ -53,6 +53,11 @@ def text(message: str, style: dict | None = None, verbatim: bool = False):
         _current_renderings.append(Rendering(type="markdown", data=message, style=style))
 
 
+def code_cell(code: str):
+    """Embed a live executable Python code cell (runs in browser via Pyodide)."""
+    _current_renderings.append(Rendering(type="python_cell", data=code.strip()))
+
+
 def image(url: str, style: dict | None = None, width: int | str | None = None):
     """Show the image at `url`."""
     style = style or {}

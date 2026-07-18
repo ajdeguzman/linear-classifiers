@@ -2,7 +2,7 @@ import math
 import random
 from dataclasses import dataclass
 
-from execute_util import link, image, text
+from execute_util import link, image, text, code_cell
 from lecture_util import article_link, youtube_link
 from references_linclass import (
     rosenblatt_1958, novikoff_1962, minsky_papert_1969,
@@ -226,6 +226,60 @@ def perceptron():
     final_weights = params.weights  # @inspect final_weights
     final_bias    = params.bias     # @inspect final_bias
 
+    text("### Live Demo — Perceptron Training")
+    code_cell("""
+import numpy as np
+import matplotlib.pyplot as plt
+
+# AND gate dataset
+X = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)
+y = np.array([0, 0, 0, 1])
+
+# Train perceptron from scratch
+w = np.array([0.0, 0.0])
+b = 0.0
+eta = 1.0
+epoch_errors = []
+
+for epoch in range(20):
+    errors = 0
+    for xi, ti in zip(X, y):
+        yi = 1 if (w @ xi + b) >= 0 else 0
+        if yi != ti:
+            w += eta * (ti - yi) * xi
+            b += eta * (ti - yi)
+            errors += 1
+    epoch_errors.append(errors)
+    if errors == 0:
+        break
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+
+# Left: learned decision boundary
+colors = ['steelblue' if c == 0 else 'tomato' for c in y]
+ax1.scatter(X[:,0], X[:,1], c=colors, s=150, zorder=3, edgecolors='black')
+for xi, lbl in zip(X, ['(0,0)→0','(0,1)→0','(1,0)→0','(1,1)→1']):
+    ax1.annotate(lbl, xi, textcoords='offset points', xytext=(8, 5), fontsize=9)
+if abs(w[1]) > 1e-6:
+    x1v = np.linspace(-0.5, 1.5, 100)
+    ax1.plot(x1v, (-w[0]*x1v - b) / w[1], 'k--', lw=1.5,
+             label=f'w=[{w[0]:.1f}, {w[1]:.1f}], b={b:.1f}')
+ax1.set_xlim(-0.5, 1.5); ax1.set_ylim(-0.5, 1.5)
+ax1.set_title('AND Gate — Learned Decision Boundary')
+ax1.legend(fontsize=8); ax1.set_aspect('equal'); ax1.grid(True, alpha=0.3)
+
+# Right: misclassifications per epoch
+ax2.bar(range(1, len(epoch_errors)+1), epoch_errors, color='steelblue', alpha=0.7)
+ax2.set_xlabel('Epoch'); ax2.set_ylabel('Misclassifications')
+ax2.set_title(f'Training Errors per Epoch')
+ax2.set_xticks(range(1, len(epoch_errors)+1))
+
+plt.tight_layout()
+plt.show()
+print(f"Converged in {len(epoch_errors)} epoch(s)")
+print(f"Final: w1={w[0]:.1f}, w2={w[1]:.1f}, bias={b:.1f}")
+""")
+
     text("### The XOR Problem: Perceptron's Hard Limit")
     link(minsky_papert_1969)
     text("The perceptron only works when data is **linearly separable**.")
@@ -327,6 +381,46 @@ def lda():
     text("- $S_B$: Between-Class Scatter (how far apart the group means are).")
     text("- $S_W$: Within-Class Scatter (how spread out each group is internally).")
     text("Optimal projection direction: $w = S_W^{-1}(m_1 - m_2)$.")
+
+    text("### Live Demo — LDA Projection")
+    code_cell("""
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+X0 = np.random.randn(30, 2) + [2, 2]   # Class 0
+X1 = np.random.randn(30, 2) + [6, 5]   # Class 1
+X = np.vstack([X0, X1])
+
+# Compute LDA direction: w = Sw^{-1} (m1 - m0)
+m0, m1 = X0.mean(axis=0), X1.mean(axis=0)
+Sw = (X0 - m0).T @ (X0 - m0) + (X1 - m1).T @ (X1 - m1)
+w = np.linalg.inv(Sw) @ (m1 - m0)
+w = w / np.linalg.norm(w)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+
+# Left: 2D scatter + LDA axis
+ax1.scatter(*X0.T, color='steelblue', label='Class 0', alpha=0.7)
+ax1.scatter(*X1.T, color='tomato',    label='Class 1', alpha=0.7)
+cx, cy = X.mean(axis=0)
+t = np.linspace(-5, 5, 100)
+ax1.plot(cx + t*w[0], cy + t*w[1], 'k--', lw=1.5, label='LDA axis')
+ax1.set_title('Original 2D Data + LDA Direction')
+ax1.legend(); ax1.set_aspect('equal')
+
+# Right: 1D projected distributions
+proj0, proj1 = X0 @ w, X1 @ w
+ax2.hist(proj0, bins=12, alpha=0.6, color='steelblue', label='Class 0')
+ax2.hist(proj1, bins=12, alpha=0.6, color='tomato',    label='Class 1')
+boundary = (proj0.mean() + proj1.mean()) / 2
+ax2.axvline(boundary, color='black', linestyle='--', label=f'Boundary ≈ {boundary:.2f}')
+ax2.set_title('1D Projected Distributions')
+ax2.legend()
+
+plt.tight_layout()
+plt.show()
+""")
 
 
 ############################################################

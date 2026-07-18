@@ -204,3 +204,74 @@ button {
 .cloaked {
   opacity: 0.08;
 }
+
+.python-cell {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin: 6px 0;
+  overflow: hidden;
+  width: 760px;
+}
+
+.python-cell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: #e8e8e8;
+  border-bottom: 1px solid #ccc;
+}
+
+.python-cell-label {
+  font-size: 0.78em;
+  color: #555;
+  font-family: monospace;
+}
+
+.python-cell-run {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 3px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.82em;
+}
+
+.python-cell-run:disabled {
+  background: #9e9e9e;
+  cursor: not-allowed;
+}
+
+.python-cell-code {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: monospace;
+  font-size: 0.88em;
+  resize: vertical;
+  box-sizing: border-box;
+  outline: none;
+  line-height: 1.5;
+}
+
+.python-cell-output {
+  border-top: 1px solid #ccc;
+  padding: 8px 10px;
+  background: #fafafa;
+}
+
+.python-cell-stdout {
+  margin: 0 0 6px;
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 0.85em;
+  color: #222;
+}
+
+.python-cell-error {
+  color: #c62828;
+}

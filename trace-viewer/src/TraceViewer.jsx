@@ -392,6 +392,42 @@ function makeProgressBar(currentStepIndex, totalSteps) {
   );
 }
 
+/**
+ * Returns the set of 1-indexed line numbers that are continuation content
+ * inside triple-quoted strings ("""..."""). These lines are not Python
+ * statements and should be hidden in the viewer.
+ */
+function computeStringContentLines(fileContents) {
+  const lines = fileContents.split('\n');
+  const result = new Set();
+  let inTriple = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const lineNum = i + 1;
+    const line = lines[i];
+
+    if (!inTriple) {
+      // Count triple-quote occurrences to detect an unclosed opening
+      const matches = line.match(/"""/g) || [];
+      if (matches.length % 2 === 1) {
+        // Odd count → opens a triple-quoted string that extends to next lines
+        inTriple = true;
+        // The opening line itself is a real statement — not hidden
+      }
+    } else {
+      if (line.includes('"""')) {
+        // Closing line — also a string content line (just `""")`)
+        result.add(lineNum);
+        inTriple = false;
+      } else {
+        result.add(lineNum);
+      }
+    }
+  }
+
+  return result;
+}
+
 function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, targetStepIndex, rawMode, animateMode, navigate}) {
   const linesToShow = computeLinesToShow({trace, currentStepIndex});
 
@@ -401,13 +437,11 @@ function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, t
     lineNumberToRenderings[getLast(step.stack).line_number] = step.renderings;
   }
 
-  // Set of line numbers that were actually traced (to hide triple-quoted string content)
-  const tracedLineNumbers = new Set(
-    trace.steps.map(step => getLast(step.stack).line_number)
-  );
-
   // Get the file contents that we're showing
   const fileContents = trace.files[currentPath];
+
+  // Lines that are continuation content inside triple-quoted strings (should be hidden)
+  const stringContentLines = computeStringContentLines(fileContents);
 
   // Apply syntax highlighting
   const highlightedContents = hljs.highlight(fileContents, { language: "python" }).value;
@@ -434,12 +468,12 @@ function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, t
         </span>;
       });
       renderedItems.push(<div key="renderings" className="renderings">{renderedRenderings}</div>);
-    } else if (rawMode || tracedLineNumbers.has(lineNumber)) {
+    } else if (!rawMode && stringContentLines.has(lineNumber)) {
+      // Lines inside triple-quoted string arguments — hide completely
+      return null;
+    } else {
       // Note: line is HTML for syntax highlighting
       renderedItems.push(<span key="code" className="code-container" dangerouslySetInnerHTML={{ __html: line }} />);
-    } else {
-      // Untraced lines (e.g., inside triple-quoted strings) — hide completely
-      return null;
     }
 
     const lineNumberSpan = (

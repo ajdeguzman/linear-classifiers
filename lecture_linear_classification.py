@@ -120,7 +120,7 @@ def lda():
     image("images/dimensionality_reduction_2.webp", width=600)
     text("### Geometric Intuition")
     text("Example: Houses on the market with price, age, size, distance to public transport and number of rooms")
-    iframe("lda-explorable/index.html", height=800)
+    iframe("lda-explorable/index.html", height=2000)
     text("### The Mathematical Concept — Fisher's Criterion")
     text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")
     text("$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$")

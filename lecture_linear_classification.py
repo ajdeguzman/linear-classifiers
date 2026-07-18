@@ -15,10 +15,10 @@ def main():
     welcome()
     what_is_classification()
     linear_classification_overview()
-    perceptron()
-    logistic_regression()
-    linear_svm()
     lda()
+    logistic_regression()
+    perceptron()
+    linear_svm()
     evaluation_metrics()
 
 
@@ -109,7 +109,7 @@ def dot(a: list[float], b: list[float]) -> float:
 
 
 def perceptron():
-    text("## 1. The Perceptron")
+    text("## 3. The Perceptron")
     link(rosenblatt_1958)
 
     text("### Definition")
@@ -333,29 +333,184 @@ def hinge_loss(score: float, y: int) -> float:
 
 
 def linear_svm():
-    text("## 3. Linear Support Vector Machine (Linear SVM)")
+    text("## 4. Linear Support Vector Machine (Linear SVM)")
     link(cortes_vapnik_1995)
-    text("Both the Perceptron and Logistic Regression find *a* separating hyperplane.")
-    text("An SVM finds the **widest possible road** between two classes — the maximum-margin hyperplane.")
 
-    text("### The Analogy: Building a Grand Highway")
-    text("You are building a highway between two towns: Red Town and Blue Town.")
-    text("You don't want a narrow road hugging the outer houses — a child might wander onto the asphalt.")
-    text("Instead, you pave as much empty land as possible between the towns.")
-    text("The outermost houses sitting directly on the highway edge are the **Support Vectors**.")
-    text("They define the limits of your highway's **Margin** (width).")
+    text("### Definition")
+    text("A Linear Support Vector Machine is a supervised machine learning algorithm used for **binary classification**.")
+    text("It finds the optimal separating **hyperplane** (a straight line in 2D, a flat plane in 3D) that divides two classes while **maximizing the margin** — the empty buffer zone between the boundary and the nearest data points of each class.")
+    text("*Linear SVM draws the single straight line that is as far away as possible from the nearest points of both classes, and those nearest points are the **support vectors** that pin the line in place.*")
+    image("images/lsvm.png", width=600)
+    text("### The Linear SVM Formula")
+    text("Just like the Perceptron, Linear SVM uses a weighted sum plus bias — the **decision function**:")
+    text("$$f(x) = w \\cdot x + b = w_1 x_1 + w_2 x_2 + \\cdots + w_n x_n + b$$")
+    text("The predicted class uses the **sign function** instead of a step function:")
+    text("$$y = \\text{sign}(w \\cdot x + b) = \\begin{cases} +1 & \\text{if } w \\cdot x + b \\geq 0 \\\\ -1 & \\text{if } w \\cdot x + b < 0 \\end{cases}$$")
 
-    text("### The Mathematical Concept")
-    text("Minimize $\\frac{1}{2}\\|w\\|^2$ subject to every point lying on the correct side:")
-    text("$$y_i(w^T x_i + b) \\geq 1 \\quad \\forall\\, i$$")
-    text("A data point where $y_i(w^T x_i + b) = 1$ sits exactly on the margin edge — it is a **Support Vector**.")
+    text("### Breakdown of the Formula")
+    text(
+        "| Symbol | Name |\n"
+        "|---|---|\n"
+        "| $x = (x_1, \\ldots, x_n)$ | Feature vector |\n"
+        "| $w = (w_1, \\ldots, w_n)$ | Weight vector |\n"
+        "| $b$ | Bias / Intercept |\n"
+        "| $w \\cdot x + b$ | Decision function |\n"
+        "| $\\text{sign}(\\,)$ | Sign function |\n"
+        "| $y_i$ | True class label |\n"
+        "| $\\|w\\|$ | Norm (magnitude) of $w$ |\n"
+        "| Support vectors | — |"
+    )
+
+    text("### The Margin")
+    text("SVM does not just draw one line — it conceptually draws **three parallel lines**: the decision boundary in the middle, and two margin boundaries on either side touching the nearest points of each class:")
+    text("- **Positive margin boundary:** $w \\cdot x + b = +1$")
+    text("- **Negative margin boundary:** $w \\cdot x + b = -1$")
+    text("The distance between these two margin boundaries is the **margin**, calculated directly from the length of $w$:")
+    text("$$\\text{Margin width} = \\frac{2}{\\|w\\|}$$")
+
+    text("### How Linear SVM Separates the Classes")
+    text("**The Decision Boundary and the Margin 'Street':** The equation $w \\cdot x + b = 0$ is the decision boundary, exactly as in the Perceptron. But SVM adds two more parallel lines ($w \\cdot x + b = 1$ and $w \\cdot x + b = -1$) that mark the edges of the widest possible empty street between the classes.")
+    text("**Support Vectors — The Points That Actually Matter:** Once trained, most points are irrelevant to the final boundary. Only the points where $y_i(w \\cdot x_i + b) = 1$ — sitting exactly on the margin boundaries — are the **support vectors**.")
+    text("**Separating the Class Fields:** Identify which columns are *features* ($x_1, x_2, \\ldots$) and which is the *target label* $y \\in \\{-1, +1\\}$.")
+
+    text("### Example 1: Classifying Points with a Trained Linear SVM")
+    text("Given trained weights: $w = (1,\\, 1)$, bias $b = -5$")
+    svm_points: list[tuple[str, float, float, int]] = [
+        ("P1", 0.0, 1.0, -1),
+        ("P2", 1.0, 3.0, -1),
+        ("P3", 4.0, 2.0, +1),
+        ("P4", 5.0, 4.0, +1),
+    ]  # @inspect svm_points
+
+    text("**Step 1:** Write the decision function for this problem:")
+    text("$$f(x) = (1)(x_1) + (1)(x_2) + (-5) = x_1 + x_2 - 5$$")
+    w1_svm = 1.0   # @inspect w1_svm
+    w2_svm = 1.0   # @inspect w2_svm
+    b_svm  = -5.0  # @inspect b_svm
+
+    text("**Step 2:** Substitute each point's feature values and apply the sign function.")
+    f_p1 = w1_svm * svm_points[0][1] + w2_svm * svm_points[0][2] + b_svm  # @inspect f_p1
+    y_p1 = 1 if f_p1 >= 0 else -1  # @inspect y_p1
+    f_p2 = w1_svm * svm_points[1][1] + w2_svm * svm_points[1][2] + b_svm  # @inspect f_p2
+    y_p2 = 1 if f_p2 >= 0 else -1  # @inspect y_p2
+    f_p3 = w1_svm * svm_points[2][1] + w2_svm * svm_points[2][2] + b_svm  # @inspect f_p3
+    y_p3 = 1 if f_p3 >= 0 else -1  # @inspect y_p3
+    f_p4 = w1_svm * svm_points[3][1] + w2_svm * svm_points[3][2] + b_svm  # @inspect f_p4
+    y_p4 = 1 if f_p4 >= 0 else -1  # @inspect y_p4
+
+    text("**Step 3:** Separate the classes.")
+    text("The decision boundary is $x_1 + x_2 - 5 = 0$, or rewritten as $x_2 = 5 - x_1$.")
+    text("The **sign** of $f(x)$ determines the label: $f(x) < 0 \\Rightarrow -1$, $f(x) > 0 \\Rightarrow +1$.")
+
+    text("### Example 2: Identifying the Support Vectors")
+    text("**Step 1:** For every point compute the **functional margin** $y_i \\times f(x_i)$.")
+    text("A value of exactly **1** means the point sits precisely on its margin boundary.")
+    fm_p1 = svm_points[0][3] * f_p1  # @inspect fm_p1
+    fm_p2 = svm_points[1][3] * f_p2  # @inspect fm_p2
+    fm_p3 = svm_points[2][3] * f_p3  # @inspect fm_p3
+    fm_p4 = svm_points[3][3] * f_p4  # @inspect fm_p4
+    text("**Step 2:** Interpret — P2 ($y \\times f = 1$) and P3 ($y \\times f = 1$) are the **support vectors**. P1 and P4 are far inside the safe zone.")
+
+    text("### Example 3: Computing the Margin Width")
+    text("**Step 1:** Compute the norm of the weight vector:")
+    text("$$\\|w\\| = \\sqrt{w_1^2 + w_2^2} = \\sqrt{1^2 + 1^2} = \\sqrt{2} \\approx 1.414$$")
+    norm_w = math.sqrt(w1_svm**2 + w2_svm**2)  # @inspect norm_w
+
+    text("**Step 2:** Apply the margin formula:")
+    text("$$\\text{Margin width} = \\frac{2}{\\|w\\|} = \\frac{2}{\\sqrt{2}} \\approx 1.414$$")
+    margin_width = 2.0 / norm_w  # @inspect margin_width
+
+    text("**Step 3:** Write the two margin boundary equations using $b = -5$:")
+    text("- **Positive margin boundary:** $x_1 + x_2 - 5 = +1 \\Rightarrow x_1 + x_2 = 6$")
+    text("- **Negative margin boundary:** $x_1 + x_2 - 5 = -1 \\Rightarrow x_1 + x_2 = 4$")
+    text("**Step 4:** Interpret — P2 lies on $x_1 + x_2 = 4$ and P3 lies on $x_1 + x_2 = 6$. Moving any other point leaves the boundary unchanged; moving a support vector shifts it.")
+
+    text("### Live Demo — Linear SVM")
+    code_cell("""
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+# ── Data & parameters (edit these!) ─────────────────────────
+points = [("P1", 0.0, 1.0, -1),
+          ("P2", 1.0, 3.0, -1),
+          ("P3", 4.0, 2.0, +1),
+          ("P4", 5.0, 4.0, +1)]
+w1, w2, b = 1.0, 1.0, -5.0
+# ─────────────────────────────────────────────────────────────
+
+norm_w = np.sqrt(w1**2 + w2**2)
+margin = 2.0 / norm_w
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+
+# ── Left: scatter + decision boundary + margins ──────────────
+clr = {-1: 'steelblue', +1: 'tomato'}
+x1v = np.linspace(-1, 7, 300)
+
+ax1.plot(x1v, (-w1*x1v - b    ) / w2, 'k-',  lw=2,   label='Decision boundary (f=0)')
+ax1.plot(x1v, (-w1*x1v - b + 1) / w2, 'r--', lw=1.5, label='Positive margin (f=+1)')
+ax1.plot(x1v, (-w1*x1v - b - 1) / w2, 'b--', lw=1.5, label='Negative margin (f=−1)')
+ax1.fill_between(x1v,
+                 (-w1*x1v - b - 1) / w2,
+                 (-w1*x1v - b + 1) / w2,
+                 alpha=0.08, color='gray')
+
+for name, x1c, x2c, label in points:
+    f  = w1*x1c + w2*x2c + b
+    fm = label * f
+    is_sv = abs(fm - 1.0) < 1e-6
+    ax1.scatter(x1c, x2c, c=clr[label], s=180, zorder=4,
+                edgecolors='gold', linewidths=3.5 if is_sv else 0)
+    ax1.annotate(f'{name}  f={f:.1f}', (x1c, x2c),
+                 textcoords='offset points', xytext=(8, 5), fontsize=9)
+
+ax1.set_xlim(-1, 7); ax1.set_ylim(-1, 7)
+ax1.set_title(f'SVM: w=[{w1},{w2}], b={b}  |  margin={margin:.3f}')
+ax1.set_xlabel('x₁'); ax1.set_ylabel('x₂'); ax1.grid(True, alpha=0.3)
+blue_p = mpatches.Patch(color='steelblue', label='Class −1')
+red_p  = mpatches.Patch(color='tomato',    label='Class +1')
+gold_p = mpatches.Patch(color='gold',      label='Support Vector (ring)')
+ax1.legend(handles=[blue_p, red_p, gold_p], fontsize=8, loc='upper left')
+
+# ── Right: functional-margin bar chart ───────────────────────
+names, fms, bclrs = [], [], []
+for name, x1c, x2c, label in points:
+    f  = w1*x1c + w2*x2c + b
+    fm = label * f
+    names.append(name)
+    fms.append(fm)
+    bclrs.append('gold' if abs(fm - 1.0) < 1e-6 else 'steelblue')
+
+bars = ax2.bar(names, fms, color=bclrs, edgecolor='black', alpha=0.85)
+ax2.axhline(1.0, color='crimson', ls='--', lw=1.5, label='Margin threshold (=1)')
+for bar, fm in zip(bars, fms):
+    ax2.text(bar.get_x() + bar.get_width()/2, fm + 0.05, f'{fm:.1f}',
+             ha='center', fontsize=11, fontweight='bold')
+ax2.set_ylabel('y · f(x)'); ax2.set_title('Functional Margins  (gold = support vector)')
+ax2.legend(fontsize=9); ax2.grid(True, alpha=0.3, axis='y')
+
+plt.tight_layout()
+plt.show()
+
+# ── Console summary ───────────────────────────────────────────
+print(f"||w|| = {norm_w:.4f}   |   Margin = 2/||w|| = {margin:.4f}")
+print()
+print(f"{'Point':>5} | {'f(x)':>6} | {'y':>3} | {'y*f(x)':>7} | Support Vector?")
+print("-" * 46)
+for name, x1c, x2c, label in points:
+    f  = w1*x1c + w2*x2c + b
+    fm = label * f
+    sv = "YES" if abs(fm - 1.0) < 1e-6 else "no"
+    print(f"  {name:>3}  | {f:>6.1f} | {label:>+3} | {fm:>7.1f} | {sv}")
+""")
 
 
 ############################################################
 # 4. LDA
 
 def lda():
-    text("## 4. Linear Discriminant Analysis (LDA)")
+    text("## 1. Linear Discriminant Analysis (LDA)")
     link(fisher_1936)
     text("LDA is a statistical classification technique that works by **projection**.")
     text("It collapses high-dimensional data onto a single line, choosing the angle that maximizes class separation.")

@@ -112,110 +112,130 @@ def dot(a: list[float], b: list[float]) -> float:
 def perceptron():
     text("## 1. The Perceptron")
     link(rosenblatt_1958)
-    text("The Perceptron is the ancestor of modern deep learning, created by Frank Rosenblatt in **1958**.")
-    text("It is a virtual 'neuron': takes inputs, multiplies each by a weight, sums them, and makes a hard yes/no decision.")
-    text("It learns by **trial and error** — when it makes a mistake, it nudges its parameters.")
 
-    text("### The Analogy: The Strict Club Bouncer")
-    text("Imagine a bouncer with a mental checklist:")
-    text("1. Nice shoes? (value $x_1$)")
-    text("2. Polite attitude? (value $x_2$)")
-    text("The bouncer values politeness more than shoes, so $w_2 > w_1$.")
-    text("If the total score clears a baseline (bias $b$), you get in.")
-    text("If the bouncer wrongly rejects a polite person, they **nudge their mental rules** — that nudge is the learning rule.")
+    text("### Definition")
+    text("The Perceptron is the simplest type of artificial neural network and one of the earliest algorithms designed for **supervised binary classification** (sorting data into exactly two classes).")
+    text("It was introduced by Frank Rosenblatt in **1958**.")
+    text("*\"The Perceptron looks at a set of numbers describing something, multiplies each number by how important it is, adds them up, and decides which of two classes the thing belongs to.\"*")
 
-    text("### The Mathematical Concept")
-    text("Compute score $z$:")
-    text("$$z = w_1 x_1 + w_2 x_2 + b$$")
-    text("Apply the Step Function:")
-    text("- If $z \\geq 0$ → predict $+1$ (Pass)")
-    text("- If $z < 0$ → predict $-1$ (Fail)")
-    text("If prediction $\\hat{y}$ ≠ actual $y$, update:")
-    text("$$w_{\\text{new}} = w_{\\text{old}} + \\eta(y - \\hat{y})x, \\qquad b_{\\text{new}} = b_{\\text{old}} + \\eta(y - \\hat{y})$$")
-    text("where $\\eta$ (eta) is the **learning rate**.")
+    text("### The Perceptron Formula")
+    text("The entire decision-making process can be written as a single mathematical formula:")
+    text("$$y = f(w_1 x_1 + w_2 x_2 + \\cdots + w_n x_n + b)$$")
+    text("This is often written more compactly using summation notation:")
+    text("$$y = f\\!\\left(\\sum_{i=1}^{n} w_i x_i + b\\right)$$")
 
-    text("### Worked Example: Student Pass/Fail")
-    text("Dataset — predict Pass (+1) or Fail (−1) from hours studied ($x_1$):")
-    dataset: list[tuple[str, float, int]] = [
-        ("S1", 8.0, +1),
-        ("S2", 2.0, -1),
-    ]  # @inspect dataset
+    text("### Breakdown of the Formula")
+    text(
+        "| Symbol | Name |\n"
+        "|---|---|\n"
+        "| $x_1, x_2, \\ldots, x_n$ | Inputs / Features |\n"
+        "| $w_1, w_2, \\ldots, w_n$ | Weights |\n"
+        "| $b$ | Bias |\n"
+        "| $\\sum (w_i \\cdot x_i)$ | Weighted Sum / Net Input |\n"
+        "| $f(\\,)$ | Activation Function |\n"
+        "| $y$ | Output |"
+    )
 
-    text("Initialize: $w_1 = -0.5$, $b = 0.5$, $\\eta = 0.1$.")
-    w1 = -0.5  # @inspect w1
-    b  = 0.5   # @inspect b
-    eta = 0.1  # @inspect eta
+    text("### The Step (Activation) Function")
+    text("The classic Perceptron activation function is the **step function**:")
+    text("$$f(z) = \\begin{cases} 1 & \\text{if } z \\geq 0 \\\\ 0 & \\text{if } z < 0 \\end{cases}$$")
 
-    text("**Step 1**: Test on S1 ($x_1 = 8.0$, $y = +1$).")
-    x1_s1 = 8.0  # @inspect x1_s1
-    z_s1 = w1 * x1_s1 + b  # @inspect z_s1
-    # z_s1 = -3.5 → predict -1 (wrong — actual is +1)
-    y_hat_s1 = 1 if z_s1 >= 0 else -1  # @inspect y_hat_s1
+    text("### How the Perceptron Separates the Classes")
+    text("**The Decision Boundary:** The equation $\\sum w_i x_i + b = 0$ is literally the equation of a **line** (2 features) or a **flat plane** (more features). This line is called the **decision boundary**.")
+    text("**Separating the Class Fields:** Before computing, identify which columns are *features* (inputs) and which is the *target* (the class label you check against).")
 
-    text("Prediction is wrong → update weights.")
-    y_s1 = +1
-    update = eta * (y_s1 - y_hat_s1)  # @inspect update
-    w1_new = w1 + update * x1_s1      # @inspect w1_new
-    b_new  = b  + update               # @inspect b_new
+    text("### Example 1: AND Logic Gate")
+    text("Given weights (already trained): $w_1 = 1$, $w_2 = 1$, bias $b = -1.5$")
+    and_data: list[tuple[int, int, int]] = [
+        (0, 0, 0),
+        (0, 1, 0),
+        (1, 0, 0),
+        (1, 1, 1),
+    ]  # @inspect and_data
+    image("images/perceptron_example1_1.png", width=600)
+    text("**Step 1:** Write the formula for this problem:")
+    text("$$z = (w_1 \\cdot x_1) + (w_2 \\cdot x_2) + b$$")
+    w1_and = 1.0   # @inspect w1_and
+    w2_and = 1.0   # @inspect w2_and
+    b_and  = -1.5  # @inspect b_and
+    text("$$z = (1)(x_1) + (1)(x_2) + (-1.5)$$")
 
-    text("Verify with updated weights:")
-    z_check = w1_new * x1_s1 + b_new  # @inspect z_check
-    # z_check = 9.5 → predict +1 (correct!)
+    text("**Step 2:** Substitute each row's feature values and apply the step function.")
+    z1 = w1_and * and_data[0][0] + w2_and * and_data[0][1] + b_and  # @inspect z1
+    y1 = 1 if z1 >= 0 else 0  # @inspect y1
+    z2 = w1_and * and_data[1][0] + w2_and * and_data[1][1] + b_and  # @inspect z2
+    y2 = 1 if z2 >= 0 else 0  # @inspect y2
+    z3 = w1_and * and_data[2][0] + w2_and * and_data[2][1] + b_and  # @inspect z3
+    y3 = 1 if z3 >= 0 else 0  # @inspect y3
+    z4 = w1_and * and_data[3][0] + w2_and * and_data[3][1] + b_and  # @inspect z4
+    y4 = 1 if z4 >= 0 else 0  # @inspect y4
+    image("images/perceptron_example1_2.png", width=600)
 
-    text("The model flipped its weight from negative to positive, learning that 'studying more = pass'.")
+    text("**Step 3:** Separate the classes.")
+    text("The decision boundary is $x_1 + x_2 - 1.5 = 0$, or rewritten as $x_2 = 1.5 - x_1$.")
+    text("Only the point $(1, 1)$ lands above this line, correctly isolating the single Class 1 point from the three Class 0 points.")
 
-    text("### Training on a linearly separable dataset")
+    image("images/perceptron_example1_3.png", width=600)
+    text("### Example 2: Training the Perceptron")
     link(novikoff_1962)
     text("The perceptron is **guaranteed to converge** when data is linearly separable.")
+    text("Starting point: $w_1 = 0$, $w_2 = 0$, $b = 0$, learning rate $\\eta = 1$")
+    text("$$z = (w_1 \\cdot x_1) + (w_2 \\cdot x_2) + b$$")
+    text("**Learning rule:**")
+    text("$$w_{i,\\text{new}} = w_{i,\\text{old}} + \\eta(t - y) \\cdot x_i$$")
+    text("$$b_{\\text{new}} = b_{\\text{old}} + \\eta(t - y)$$")
+    image("images/perceptron_example2.png", width=600)
 
     def perceptron_predict(params: PerceptronParams, x: list[float]) -> int:
         score = dot(params.weights, x) + params.bias  # @inspect score
-        return 1 if score >= 0 else -1
+        return 1 if score >= 0 else 0
 
-    def perceptron_update(params: PerceptronParams, x: list[float], y: int) -> PerceptronParams:
+    def perceptron_update(params: PerceptronParams, x: list[float], t: int) -> PerceptronParams:
         y_hat = perceptron_predict(params, x)  # @inspect y_hat
-        if y_hat == y:
+        if y_hat == t:
             return params
-        new_weights = [w + eta * (y - y_hat) * xi for w, xi in zip(params.weights, x)]  # @inspect new_weights
-        new_bias = params.bias + eta * (y - y_hat)                                        # @inspect new_bias
+        new_weights = [w + eta * (t - y_hat) * xi for w, xi in zip(params.weights, x)]  # @inspect new_weights
+        new_bias = params.bias + eta * (t - y_hat)                                        # @inspect new_bias
         return PerceptronParams(weights=new_weights, bias=new_bias)
 
+    def run_perceptron_training(train_data, params, num_epochs):
+        converged_epoch = num_epochs
+        for epoch in range(num_epochs):
+            errors = 0
+            for x, t in train_data:
+                params = perceptron_update(params, x, t)
+                if perceptron_predict(params, x) != t:
+                    errors += 1
+            if errors == 0:
+                converged_epoch = epoch + 1
+                break
+        return params, converged_epoch
+
     train_data: list[tuple[list[float], int]] = [
-        ([1.0, 2.0], -1),
-        ([2.0, 1.0], -1),
-        ([1.5, 1.0], -1),
-        ([7.0, 8.0], +1),
-        ([8.0, 7.0], +1),
-        ([6.0, 9.0], +1),
+        ([0.0, 0.0], 0),
+        ([0.0, 1.0], 0),
+        ([1.0, 0.0], 0),
+        ([1.0, 1.0], 1),
     ]  # @inspect train_data
 
-    d = len(train_data[0][0])  # @inspect d
-    params = PerceptronParams(weights=[0.0] * d, bias=0.0)  # @inspect params
-
+    eta = 1.0  # @inspect eta
+    params = PerceptronParams(weights=[0.0, 0.0], bias=0.0)  # @inspect params
     num_epochs = 20  # @inspect num_epochs
-    converged_epoch = num_epochs
-    for epoch in range(num_epochs):
-        errors = 0
-        for x, y in train_data:
-            params = perceptron_update(params, x, y)
-            if perceptron_predict(params, x) != y:
-                errors += 1
-        if errors == 0:
-            converged_epoch = epoch + 1  # @inspect converged_epoch
-            break
+
+    params, converged_epoch = run_perceptron_training(train_data, params, num_epochs)  # @stepover @inspect converged_epoch
 
     final_weights = params.weights  # @inspect final_weights
     final_bias    = params.bias     # @inspect final_bias
 
-    text("### The XOR problem: perceptron's hard limit")
+    text("### The XOR Problem: Perceptron's Hard Limit")
     link(minsky_papert_1969)
     text("The perceptron only works when data is **linearly separable**.")
     text("XOR cannot be solved by any single straight line:")
     xor_data: list[tuple[list[float], int]] = [
-        ([0.0, 0.0], -1),
-        ([1.0, 1.0], -1),
-        ([0.0, 1.0], +1),
-        ([1.0, 0.0], +1),
+        ([0.0, 0.0], 0),
+        ([1.0, 1.0], 0),
+        ([0.0, 1.0], 1),
+        ([1.0, 0.0], 1),
     ]  # @inspect xor_data
     text("No hyperplane can separate these four points — this limitation motivated multi-layer networks.")
 

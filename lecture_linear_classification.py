@@ -96,7 +96,110 @@ def linear_classification_overview():
     text("")
 
 ############################################################
-# 1. Perceptron
+# 1. LDA
+
+def lda():
+    text("## 1. Linear Discriminant Analysis (LDA)")
+    link(fisher_1936)
+    text("LDA is a statistical classification technique that works by **projection**.")
+    text("It collapses high-dimensional data onto a single line, choosing the angle that maximizes class separation.")
+    image("images/pca_lda.webp", width=600)
+    image("images/lda_diagram_2.webp", width=400)
+    text("### Introduction")
+    text("To deal with classification problems with 2 or more classes, most Machine Learning (ML) algorithms work the same way.")
+    text("Usually, they apply some kind of transformation to the input data with the effect of **reducing the original input dimensions to a new (smaller) one**")
+    text("The goal is to project the data to a new space.")
+    text("Then, once projected, they try to classify the data points by finding a linear separation.")
+
+    text("Suppose we want to classify the red and blue circles correctly. It is clear that with a simple linear model we will not get a good result.")
+    image("images/linearly-inseperable-data.png", width=300)
+    text("What if we could transform the data so that we could draw a line that separates the 2 classes?")
+    image("images/feature_transformation.png", width=600)
+
+    text("### What is dimensionality and what is dimensionality reduction?")
+    image("images/dimensionality_reduction.webp", width=600)
+    image("images/dimensionality_reduction_2.webp", width=600)
+    text("### The Mathematical Concept — Fisher's Criterion")
+    text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")
+    text("$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$")
+    text("- $S_B$: Between-Class Scatter (how far apart the group means are).")
+    text("- $S_W$: Within-Class Scatter (how spread out each group is internally).")
+    text("Optimal projection direction: $w = S_W^{-1}(m_1 - m_2)$.")
+
+    text("### Live Demo — LDA Projection")
+    code_cell("""
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+X0 = np.random.randn(30, 2) + [2, 2]   # Class 0
+X1 = np.random.randn(30, 2) + [6, 5]   # Class 1
+X = np.vstack([X0, X1])
+
+# Compute LDA direction: w = Sw^{-1} (m1 - m0)
+m0, m1 = X0.mean(axis=0), X1.mean(axis=0)
+Sw = (X0 - m0).T @ (X0 - m0) + (X1 - m1).T @ (X1 - m1)
+w = np.linalg.inv(Sw) @ (m1 - m0)
+w = w / np.linalg.norm(w)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+
+# Left: 2D scatter + LDA axis
+ax1.scatter(*X0.T, color='steelblue', label='Class 0', alpha=0.7)
+ax1.scatter(*X1.T, color='tomato',    label='Class 1', alpha=0.7)
+cx, cy = X.mean(axis=0)
+t = np.linspace(-5, 5, 100)
+ax1.plot(cx + t*w[0], cy + t*w[1], 'k--', lw=1.5, label='LDA axis')
+ax1.set_title('Original 2D Data + LDA Direction')
+ax1.legend(); ax1.set_aspect('equal')
+
+# Right: 1D projected distributions
+proj0, proj1 = X0 @ w, X1 @ w
+ax2.hist(proj0, bins=12, alpha=0.6, color='steelblue', label='Class 0')
+ax2.hist(proj1, bins=12, alpha=0.6, color='tomato',    label='Class 1')
+boundary = (proj0.mean() + proj1.mean()) / 2
+ax2.axvline(boundary, color='black', linestyle='--', label=f'Boundary ≈ {boundary:.2f}')
+ax2.set_title('1D Projected Distributions')
+ax2.legend()
+
+plt.tight_layout()
+plt.show()
+""")
+
+
+############################################################
+# 2. Logistic Regression
+
+def sigmoid(z: float) -> float:
+    return 1.0 / (1.0 + math.exp(-z))
+
+
+def logistic_regression():
+    text("## 2. Logistic Regression")
+    link(cox_1958), link(bishop_2006)
+    text("Despite its name, Logistic Regression is a **classifier**.")
+    text("Instead of a blunt yes/no answer, it outputs a **probability** between 0% and 100%.")
+
+    text("### The Analogy: The Weather Forecaster")
+    text("A Perceptron-style robot says: 'It will rain. Yes or No.'")
+    text("A Logistic Regression robot behaves like a meteorologist: 'There is an **82% chance** of rain today.'")
+    text("You then apply a threshold — if chance > 50%, pack an umbrella.")
+
+    text("### The Mathematical Concept — the Sigmoid Function")
+    text("$$\\sigma(z) = \\frac{1}{1 + e^{-z}}$$")
+    text("- $z$ is any real-valued score.")
+    text("- Output is always in $(0, 1)$ — a valid probability.")
+    text("- When $z = 0$: $\\sigma(0) = 0.5$ (50% confidence).")
+    text("- Large positive $z$ → probability near 1.0.")
+    text("- Large negative $z$ → probability near 0.0.")
+
+    s_zero  = sigmoid(0.0)    # @inspect s_zero
+    s_pos   = sigmoid(3.0)    # @inspect s_pos
+    s_neg   = sigmoid(-3.0)   # @inspect s_neg
+
+
+############################################################
+# 3. Perceptron
 
 @dataclass
 class PerceptronParams:
@@ -285,39 +388,7 @@ print(f"Final: w1={w[0]:.1f}, w2={w[1]:.1f}, bias={b:.1f}")
 
 
 ############################################################
-# 2. Logistic Regression
-
-def sigmoid(z: float) -> float:
-    return 1.0 / (1.0 + math.exp(-z))
-
-
-def logistic_regression():
-    text("## 2. Logistic Regression")
-    link(cox_1958), link(bishop_2006)
-    text("Despite its name, Logistic Regression is a **classifier**.")
-    text("Instead of a blunt yes/no answer, it outputs a **probability** between 0% and 100%.")
-
-    text("### The Analogy: The Weather Forecaster")
-    text("A Perceptron-style robot says: 'It will rain. Yes or No.'")
-    text("A Logistic Regression robot behaves like a meteorologist: 'There is an **82% chance** of rain today.'")
-    text("You then apply a threshold — if chance > 50%, pack an umbrella.")
-
-    text("### The Mathematical Concept — the Sigmoid Function")
-    text("$$\\sigma(z) = \\frac{1}{1 + e^{-z}}$$")
-    text("- $z$ is any real-valued score.")
-    text("- Output is always in $(0, 1)$ — a valid probability.")
-    text("- When $z = 0$: $\\sigma(0) = 0.5$ (50% confidence).")
-    text("- Large positive $z$ → probability near 1.0.")
-    text("- Large negative $z$ → probability near 0.0.")
-
-    s_zero  = sigmoid(0.0)    # @inspect s_zero
-    s_pos   = sigmoid(3.0)    # @inspect s_pos
-    s_neg   = sigmoid(-3.0)   # @inspect s_neg
-
-
-
-############################################################
-# 3. Linear SVM
+# 4. Linear SVM
 
 def hinge_loss(score: float, y: int) -> float:
     return max(0.0, 1.0 - y * score)
@@ -483,78 +554,6 @@ for name, x1c, x2c, label in points:
     fm = label * f
     sv = "YES" if abs(fm - 1.0) < 1e-6 else "no"
     print(f"  {name:>3}  | {f:>6.1f} | {label:>+3} | {fm:>7.1f} | {sv}")
-""")
-
-
-############################################################
-# 4. LDA
-
-def lda():
-    text("## 1. Linear Discriminant Analysis (LDA)")
-    link(fisher_1936)
-    text("LDA is a statistical classification technique that works by **projection**.")
-    text("It collapses high-dimensional data onto a single line, choosing the angle that maximizes class separation.")
-    image("images/pca_lda.webp", width=600)
-    image("images/lda_diagram_2.webp", width=400)
-    text("### Introduction")
-    text("To deal with classification problems with 2 or more classes, most Machine Learning (ML) algorithms work the same way.")
-    text("Usually, they apply some kind of transformation to the input data with the effect of **reducing the original input dimensions to a new (smaller) one**")
-    text("The goal is to project the data to a new space.")
-    text("Then, once projected, they try to classify the data points by finding a linear separation.")
-    
-    text("Suppose we want to classify the red and blue circles correctly. It is clear that with a simple linear model we will not get a good result.")
-    image("images/linearly-inseperable-data.png", width=300)
-    text("What if we could transform the data so that we could draw a line that separates the 2 classes?")
-    image("images/feature_transformation.png", width=600)
-    
-    text("### What is dimensionality and what is dimensionality reduction?")
-    image("images/dimensionality_reduction.webp", width=600)
-    image("images/dimensionality_reduction_2.webp", width=600)
-    text("### The Mathematical Concept — Fisher's Criterion")
-    text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")
-    text("$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$")
-    text("- $S_B$: Between-Class Scatter (how far apart the group means are).")
-    text("- $S_W$: Within-Class Scatter (how spread out each group is internally).")
-    text("Optimal projection direction: $w = S_W^{-1}(m_1 - m_2)$.")
-
-    text("### Live Demo — LDA Projection")
-    code_cell("""
-import numpy as np
-import matplotlib.pyplot as plt
-
-np.random.seed(42)
-X0 = np.random.randn(30, 2) + [2, 2]   # Class 0
-X1 = np.random.randn(30, 2) + [6, 5]   # Class 1
-X = np.vstack([X0, X1])
-
-# Compute LDA direction: w = Sw^{-1} (m1 - m0)
-m0, m1 = X0.mean(axis=0), X1.mean(axis=0)
-Sw = (X0 - m0).T @ (X0 - m0) + (X1 - m1).T @ (X1 - m1)
-w = np.linalg.inv(Sw) @ (m1 - m0)
-w = w / np.linalg.norm(w)
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
-
-# Left: 2D scatter + LDA axis
-ax1.scatter(*X0.T, color='steelblue', label='Class 0', alpha=0.7)
-ax1.scatter(*X1.T, color='tomato',    label='Class 1', alpha=0.7)
-cx, cy = X.mean(axis=0)
-t = np.linspace(-5, 5, 100)
-ax1.plot(cx + t*w[0], cy + t*w[1], 'k--', lw=1.5, label='LDA axis')
-ax1.set_title('Original 2D Data + LDA Direction')
-ax1.legend(); ax1.set_aspect('equal')
-
-# Right: 1D projected distributions
-proj0, proj1 = X0 @ w, X1 @ w
-ax2.hist(proj0, bins=12, alpha=0.6, color='steelblue', label='Class 0')
-ax2.hist(proj1, bins=12, alpha=0.6, color='tomato',    label='Class 1')
-boundary = (proj0.mean() + proj1.mean()) / 2
-ax2.axvline(boundary, color='black', linestyle='--', label=f'Boundary ≈ {boundary:.2f}')
-ax2.set_title('1D Projected Distributions')
-ax2.legend()
-
-plt.tight_layout()
-plt.show()
 """)
 
 

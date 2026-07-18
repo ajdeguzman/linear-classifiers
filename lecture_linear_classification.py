@@ -124,16 +124,7 @@ def perceptron():
     text("$$y = f\\!\\left(\\sum_{i=1}^{n} w_i x_i + b\\right)$$")
 
     text("### Breakdown of the Formula")
-    text(
-        "| Symbol | Name |\n"
-        "|---|---|\n"
-        "| $x_1, x_2, \\ldots, x_n$ | Inputs / Features |\n"
-        "| $w_1, w_2, \\ldots, w_n$ | Weights |\n"
-        "| $b$ | Bias |\n"
-        "| $\\sum (w_i \\cdot x_i)$ | Weighted Sum / Net Input |\n"
-        "| $f(\\,)$ | Activation Function |\n"
-        "| $y$ | Output |"
-    )
+    text("| Symbol | Name |\n|---|---|\n| $x_1, x_2, \\ldots, x_n$ | Inputs / Features |\n| $w_1, w_2, \\ldots, w_n$ | Weights |\n| $b$ | Bias |\n| $\\sum (w_i \\cdot x_i)$ | Weighted Sum / Net Input |\n| $f(\\,)$ | Activation Function |\n| $y$ | Output |")
 
     text("### The Step (Activation) Function")
     text("The classic Perceptron activation function is the **step function**:")
@@ -348,18 +339,7 @@ def linear_svm():
     text("$$y = \\text{sign}(w \\cdot x + b) = \\begin{cases} +1 & \\text{if } w \\cdot x + b \\geq 0 \\\\ -1 & \\text{if } w \\cdot x + b < 0 \\end{cases}$$")
 
     text("### Breakdown of the Formula")
-    text(
-        "| Symbol | Name |\n"
-        "|---|---|\n"
-        "| $x = (x_1, \\ldots, x_n)$ | Feature vector |\n"
-        "| $w = (w_1, \\ldots, w_n)$ | Weight vector |\n"
-        "| $b$ | Bias / Intercept |\n"
-        "| $w \\cdot x + b$ | Decision function |\n"
-        "| $\\text{sign}(\\,)$ | Sign function |\n"
-        "| $y_i$ | True class label |\n"
-        "| $\\|w\\|$ | Norm (magnitude) of $w$ |\n"
-        "| Support vectors | — |"
-    )
+    text("| Symbol | Name |\n|---|---|\n| $x = (x_1, \\ldots, x_n)$ | Feature vector |\n| $w = (w_1, \\ldots, w_n)$ | Weight vector |\n| $b$ | Bias / Intercept |\n| $w \\cdot x + b$ | Decision function |\n| $\\text{sign}(\\,)$ | Sign function |\n| $y_i$ | True class label |\n| $\\|w\\|$ | Norm (magnitude) of $w$ |\n| Support vectors | — |")
 
     text("### The Margin")
     text("SVM does not just draw one line — it conceptually draws **three parallel lines**: the decision boundary in the middle, and two margin boundaries on either side touching the nearest points of each class:")
@@ -586,10 +566,7 @@ def evaluation_metrics():
     text("**Accuracy alone can mislead.** If 99% of emails are safe, always predicting 'safe' gives 99% accuracy — but catches zero spam.")
 
     text("### Confusion Matrix")
-    text("| | Predicted −1 (No) | Predicted +1 (Yes) |")
-    text("|---|---|---|")
-    text("| **Actual −1** | TN (True Negative) | FP (False Positive) |")
-    text("| **Actual +1** | FN (False Negative) | TP (True Positive) |")
+    text("| | Predicted −1 (No) | Predicted +1 (Yes) |\n|---|---|---|\n| **Actual −1** | TN (True Negative) | FP (False Positive) |\n| **Actual +1** | FN (False Negative) | TP (True Positive) |")
 
     y_true = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]  # @inspect y_true
     y_pred = [1, 0, 1, 0, 0, 1, 1, 0, 0, 0]  # @inspect y_pred
@@ -623,20 +600,10 @@ def evaluation_metrics():
     text("- **Accuracy** works when classes are balanced and all errors equally bad.")
 
     text("### Algorithm Quick Reference — Covered in Depth")
-    text("| Algorithm | Analogy | Output | Best For |")
-    text("|---|---|---|---|")
-    text("| Perceptron | Strict Club Bouncer | Hard Binary | Simple binary tasks |")
-    text("| Logistic Regression | Weather Forecaster | Probability | When confidence matters |")
-    text("| Linear SVM | Highway Construction | Margin Distance | Maximizing safety and generalization |")
-    text("| Fisher's LDA | Flashlights & Shadows | 1D Projection | Statistical group separation |")
+    text("| Algorithm | Analogy | Output | Best For |\n|---|---|---|---|\n| Perceptron | Strict Club Bouncer | Hard Binary | Simple binary tasks |\n| Logistic Regression | Weather Forecaster | Probability | When confidence matters |\n| Linear SVM | Highway Construction | Margin Distance | Maximizing safety and generalization |\n| Fisher's LDA | Flashlights & Shadows | 1D Projection | Statistical group separation |")
 
     text("### Other Linear Classifiers (Overview)")
-    text("| Algorithm | Analogy | Key Idea |")
-    text("|---|---|---|")
-    text("| Ridge Classifier | Cautious Investor | L2 penalty keeps weights small and balanced |")
-    text("| Passive-Aggressive | Driving Instructor | Silent when correct; aggressive correction on error |")
-    text("| SGD Classifier | Blindfolded Hiker | Optimization framework — any loss, one sample at a time |")
-    text("| Discriminant Functions | Video Game Scoring | One score formula per class; pick the highest |")
+    text("| Algorithm | Analogy | Key Idea |\n|---|---|---|\n| Ridge Classifier | Cautious Investor | L2 penalty keeps weights small and balanced |\n| Passive-Aggressive | Driving Instructor | Silent when correct; aggressive correction on error |\n| SGD Classifier | Blindfolded Hiker | Optimization framework — any loss, one sample at a time |\n| Discriminant Functions | Video Game Scoring | One score formula per class; pick the highest |")
 
 
 if __name__ == "__main__":

@@ -20,7 +20,6 @@ def main():
     linear_svm()
     lda()
     evaluation_metrics()
-    text("Next time: Neural networks — stacking linear classifiers with non-linearities.")
 
 
 ############################################################
@@ -117,7 +116,7 @@ def perceptron():
     text("The Perceptron is the simplest type of artificial neural network and one of the earliest algorithms designed for **supervised binary classification** (sorting data into exactly two classes).")
     text("It was introduced by Frank Rosenblatt in **1958**.")
     text("*\"The Perceptron looks at a set of numbers describing something, multiplies each number by how important it is, adds them up, and decides which of two classes the thing belongs to.\"*")
-
+    image("images/perceptron.png", width=600)
     text("### The Perceptron Formula")
     text("The entire decision-making process can be written as a single mathematical formula:")
     text("$$y = f(w_1 x_1 + w_2 x_2 + \\cdots + w_n x_n + b)$$")
@@ -307,6 +306,7 @@ def lda():
     text("LDA is a statistical classification technique that works by **projection**.")
     text("It collapses high-dimensional data onto a single line, choosing the angle that maximizes class separation.")
     image("images/pca_lda.webp", width=600)
+    image("images/lda_diagram_2.webp", width=400)
     text("### Introduction")
     text("To deal with classification problems with 2 or more classes, most Machine Learning (ML) algorithms work the same way.")
     text("Usually, they apply some kind of transformation to the input data with the effect of **reducing the original input dimensions to a new (smaller) one**")
@@ -317,7 +317,10 @@ def lda():
     image("images/linearly-inseperable-data.png", width=300)
     text("What if we could transform the data so that we could draw a line that separates the 2 classes?")
     image("images/feature_transformation.png", width=600)
-
+    
+    text("### What is dimensionality and what is dimensionality reduction?")
+    image("images/dimensionality_reduction.webp", width=600)
+    image("images/dimensionality_reduction_2.webp", width=600)
     text("### The Mathematical Concept — Fisher's Criterion")
     text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")
     text("$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$")

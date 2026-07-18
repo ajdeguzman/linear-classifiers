@@ -32,12 +32,12 @@ def welcome():
 ############################################################
 
 def what_is_classification():
-    text("### Recap:Supervised vs. Unsupervised Learning")
-    text("### Supervised Learning: Two broad categories")
+    text("## Recap: Supervised vs. Unsupervised Learning")
+    image("images/ai_ml_dl.png", width=300)
+    text("## Supervised Learning: Two broad categories")
     text("## Classification vs. Regression")
     text("**Regression** predicts a *continuous* value — e.g., predicting Alex Eala's score next match.")
     text("**Classification** predicts a *discrete class label* — e.g., spam or not-spam.")
-
     text("### Binary Classification")
     text("Two classes: output is 0 or 1 (Yes/No, Pass/Fail).")
     text("Examples: email spam filter, bank loan approval, medical risk flagging.")
@@ -94,7 +94,7 @@ def linear_classification_overview():
         "Random Forests",
         "Multi-layer Neural Networks",
     ]  # @inspect nonlinear_examples
-
+    text("")
 
 ############################################################
 # 1. Perceptron

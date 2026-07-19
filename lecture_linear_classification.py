@@ -107,9 +107,20 @@ def lda():
     image("images/lda_diagram_2.webp", width=400)
     text("### Introduction")
     text("To deal with classification problems with 2 or more classes, most Machine Learning (ML) algorithms work the same way.")
+    
     text("Usually, they apply some kind of transformation to the input data with the effect of **reducing the original input dimensions to a new (smaller) one**")
+    
     text("The goal is to project the data to a new space.")
     text("Then, once projected, they try to classify the data points by finding a linear separation.")
+
+    text("Suppose we want to classify the red and blue circles correctly.")
+    image("images/linearly-inseperable-data.png", width=300)
+    text("What if we could transform the data so that we could draw a line that separates the 2 classes?")
+    image("images/feature_transformation.png", width=600)
+
+    text("### What is dimensionality and what is dimensionality reduction?")
+    image("images/dimensionality_reduction.webp", width=600)
+    image("images/dimensionality_reduction_2.webp", width=600)
 
     text("### The Mathematical Concept — Fisher's Criterion")
     text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")
@@ -118,15 +129,6 @@ def lda():
     text("- $S_W$: Within-Class Scatter (how spread out each group is internally).")
     text("Optimal projection direction: $w = S_W^{-1}(m_1 - m_2)$.")
     image("images/separation.png", width=600)
-
-    text("Suppose we want to classify the red and blue circles correctly. It is clear that with a simple linear model we will not get a good result.")
-    image("images/linearly-inseperable-data.png", width=300)
-    text("What if we could transform the data so that we could draw a line that separates the 2 classes?")
-    image("images/feature_transformation.png", width=600)
-
-    text("### What is dimensionality and what is dimensionality reduction?")
-    image("images/dimensionality_reduction.webp", width=600)
-    image("images/dimensionality_reduction_2.webp", width=600)
 
     text("### Geometric Intuition")
     text("Example: Houses on the market with price, age, size, distance to public transport and number of rooms")

@@ -278,6 +278,25 @@ def logistic_regression():
     s_pos   = sigmoid(3.0)    # @inspect s_pos
     s_neg   = sigmoid(-3.0)   # @inspect s_neg
 
+    text("### Scenario: Will a student pass an exam?")
+    text("Suppose we've built a tiny logistic regression model that predicts the probability a student passes based on hours studied. The model has learned two numbers (its parameters):")
+    text("$$weight = 0.6, \\quad bias = -3$$")
+    
+    text("We want to predict the pass probability for a student who studied **6 hours.**")
+
+    text("### Step 1: Compute z (the linear part)")
+    text("First we combine the input with the model's parameters:")
+    text("$$z = w \\cdot x + b$$")
+    text("For our example:")
+    text("$$z = 0.6 \\times 6 + (-3) = 0.6$$")
+    text("So **z = 0.6**")
+
+    text("### Step 2: Plug z into the sigmoid")
+    text("$$p = \\sigma(z) = \\frac{1}{1 + e^{-0.6}} \\approx 0.645$$")
+
+    text("### Step 3: Interpret the result")
+    text("The model predicts a **64.5% chance** of passing the exam.")
+
 
 ############################################################
 # 3. Perceptron

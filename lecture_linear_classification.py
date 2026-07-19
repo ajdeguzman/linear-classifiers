@@ -136,7 +136,6 @@ def lda():
 
     text("### Scenario")
     text("Suppose you're a real-estate analyst and you want to predict whether a listed house will be a fast seller (sold within a month) or a slow seller (sat on the market for several months).")
-    text("$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$")
     text("\nYou describe each house with two features:")
     text("- $x_1$ = floor area ($m^2$)")
     text("- $x_2$ = distance to the city center (km)")
@@ -161,14 +160,14 @@ def lda():
     text("### Step 4:  Solve for the optimal direction")
     image("images/lda_step4.png", width=600)
 
+
+    image("images/lda_3formula.png", width=600)
+
     text("### Live Demo — LDA Projection")
     code_cell("""
 import numpy as np
 import matplotlib.pyplot as plt
 
-# ---------------------------------------------------------------------------
-# 1. Data  (each row = one house: [floor_area_m2, distance_km])
-# ---------------------------------------------------------------------------
 fast = np.array([[120, 3],
                  [100, 5],
                  [140, 4]], dtype=float)   # Class 1: sold within a month
@@ -178,7 +177,7 @@ slow = np.array([[ 80,  9],
                  [100, 10]], dtype=float)  # Class 2: took several months
 
 # ---------------------------------------------------------------------------
-# 2. Class means  ->  m = (1/N) * sum(x)
+# 1. Class means  ->  m = (1/N) * sum(x)
 # ---------------------------------------------------------------------------
 m1 = fast.mean(axis=0)          # mean of class 1
 m2 = slow.mean(axis=0)          # mean of class 2
@@ -186,7 +185,7 @@ print("m1 (fast) =", m1)        # [120.  4.]
 print("m2 (slow) =", m2)        # [ 80. 10.]
 
 # ---------------------------------------------------------------------------
-# 3. Within-class scatter  ->  S_i = sum (x - m)(x - m)^T ,   S_W = S1 + S2
+# 2. Within-class scatter  ->  S_i = sum (x - m)(x - m)^T ,   S_W = S1 + S2
 # ---------------------------------------------------------------------------
 def scatter(X, m):
     d = X - m                    # deviations from the class mean
@@ -198,14 +197,14 @@ S_W = S1 + S2
 print("S_W ="); print(S_W)       # [[1600. -40.] [-40.   4.]]
 
 # ---------------------------------------------------------------------------
-# 4. Fisher direction  ->  w = S_W^{-1} (m1 - m2)
+# 3. Fisher direction  ->  w = S_W^{-1} (m1 - m2)
 # ---------------------------------------------------------------------------
 w = np.linalg.solve(S_W, m1 - m2)   # solve is more stable than inv()
 w = w / w[0]                        # rescale so w[0] = 1  ->  ~[1, 100]
 print("w =", w)                     # [  1. 100.]
 
 # ---------------------------------------------------------------------------
-# 5. Threshold  ->  midpoint of the projected means
+# 4. Threshold  ->  midpoint of the projected means
 # ---------------------------------------------------------------------------
 c = w @ (m1 + m2) / 2
 print("threshold c =", c)           # 800.0
@@ -218,7 +217,7 @@ print("90 m2, 8 km  ->", classify([90, 8]))    # slow
 print("130 m2, 4 km ->", classify([130, 4]))   # fast
 
 # ---------------------------------------------------------------------------
-# 6. Plot
+# 5. Plot
 # ---------------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(7, 5))
 

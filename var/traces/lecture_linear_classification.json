@@ -1,6 +1,6 @@
 {
   "files": {
-    "lecture_linear_classification.py": "import math\nimport random\nfrom dataclasses import dataclass\n\nfrom execute_util import link, image, text, code_cell, iframe\nfrom lecture_util import article_link, youtube_link\nfrom references_linclass import (\n    rosenblatt_1958, novikoff_1962, minsky_papert_1969,\n    cox_1958, cortes_vapnik_1995,\n    fisher_1936, hoerl_kennard_1970, crammer_2006, bishop_2006,\n)\n\n\ndef main():\n    welcome()\n    what_is_classification()\n    linear_classification_overview()\n    lda()\n    logistic_regression()\n    perceptron()\n    linear_svm()\n    evaluation_metrics()\n\n\n############################################################\n\ndef welcome():\n    text(\"## Linear Classification Techniques\")\n    text(\"**Presenters**: AJ Barcelona, A De Guzman, J Gambito\")\n    text(\"University of the Cordilleras - Linear Techniques and Machine Learning\")\n\n############################################################\n\ndef what_is_classification():\n    text(\"## Recap: Supervised vs. Unsupervised Learning\")\n    image(\"images/ai_ml_dl.png\", width=300)\n    text(\"## Supervised Learning: Two broad categories\")\n    text(\"## Classification vs. Regression\")\n    text(\"**Regression** predicts a *continuous* value \u2014 e.g., predicting Alex Eala's score next match.\")\n    text(\"**Classification** predicts a *discrete class label* \u2014 e.g., spam or not-spam.\")\n    text(\"### Binary Classification\")\n    text(\"**Two classes:** output is 0 or 1 (Yes/No, Pass/Fail).\")\n    text(\"**Examples:** email spam filter, bank loan approval, medical risk flagging.\")\n\n    text(\"### Multiclass Classification\")\n    text(\"**More than two classes:** news categories, book subjects, student streams.\")\n    text(\"A problem can be binary *or* multiclass depending on how we define the classes.\")\n    text(\"Sentiment analysis is binary ('positive'/'negative') but becomes multiclass if we add 'neutral'.\")\n\n    text(\"### How classification works \u2014 five steps\")\n    steps: list[str] = []\n    steps.append(\"Data Collection: gather labeled examples.\")        # @inspect steps\n    steps.append(\"Feature Extraction: identify attributes that distinguish classes.\")  # @inspect steps\n    steps.append(\"Model Training: learn patterns connecting features to labels.\")      # @inspect steps\n    steps.append(\"Model Evaluation: test on unseen data to measure accuracy.\")        # @inspect steps\n    steps.append(\"Prediction: classify new inputs using learned patterns.\")            # @inspect steps\n\n\n############################################################\n\ndef linear_classification_overview():\n    text(\"## What is Linear Classification?\")\n    text(\"A linear classifier summarizes training data into a fixed set of **weights** $w$ and a **bias** $b$.\")\n    text(\"It computes a score as a dot product:\")\n    text(\"$$\\\\text{score}(x) = w \\\\cdot x + b$$\")\n    text(\"- $x$ = feature vector\")\n    text(\"- $w$ = weights (importance of each feature)\")\n    text(\"- $b$ = bias (baseline offset)\")\n\n    text(\"### Decision rule\")\n    text(\"If $\\\\text{score}(x) >= 75$ \u2192 **Class A**.\")\n    text(\"If $\\\\text{score}(x) <  75$ \u2192 **Class B**.\")\n    text(\"The boundary where score = 0 is called the **Decision Boundary** (a hyperplane).\")\n\n    text(\"### Linear vs. Non-linear Classifiers\")\n    text(\"**Linear** classifiers draw a straight boundary \u2014 fast, interpretable, great for large datasets:\")\n    linear_examples: list[str] = [\n        \"LDA\",\n        \"Logistic Regression\",\n        \"Perceptron\",\n        \"Linear SVM\",\n        \"SGD Classifier\",\n        \"Ridge Classifier\",\n        \"Passive-Aggressive Classifier\",\n        \"Linear Discriminant Functions\",\n    ]  # @inspect linear_examples\n\n    text(\"**Non-linear** classifiers draw curved boundaries \u2014 more powerful but slower and harder to interpret:\")\n    nonlinear_examples: list[str] = [\n        \"K-Nearest Neighbours\",\n        \"Kernel SVM\",\n        \"Decision Trees\",\n        \"Random Forests\",\n        \"Multi-layer Neural Networks\",\n    ]  # @inspect nonlinear_examples\n    text(\"\")\n\n############################################################\n# 1. LDA\n\ndef lda():\n    text(\"## 1. Linear Discriminant Analysis (LDA)\")\n    link(fisher_1936)\n    text(\"LDA is a statistical classification technique that works by **projection**.\")\n    text(\"It collapses high-dimensional data onto a single line, choosing the angle that maximizes class separation.\")\n    image(\"images/pca_lda.webp\", width=600)\n    image(\"images/lda_diagram_2.webp\", width=400)\n    text(\"### Introduction\")\n    text(\"To deal with classification problems with 2 or more classes, most Machine Learning (ML) algorithms work the same way.\")\n    \n    text(\"Usually, they apply some kind of transformation to the input data with the effect of **reducing the original input dimensions to a new (smaller) one**\")\n    \n    text(\"The goal is to project the data to a new space.\")\n    text(\"Then, once projected, they try to classify the data points by finding a linear separation.\")\n\n    text(\"Suppose we want to classify the red and blue circles correctly.\")\n    image(\"images/linearly-inseperable-data.png\", width=300)\n    text(\"What if we could transform the data so that we could draw a line that separates the 2 classes?\")\n    image(\"images/feature_transformation.png\", width=600)\n\n    text(\"### What is dimensionality and what is dimensionality reduction?\")\n    image(\"images/dimensionality_reduction.webp\", width=600)\n    image(\"images/dimensionality_reduction_2.webp\", width=600)\n\n    text(\"### The Mathematical Concept \u2014 Fisher's Criterion\")\n    text(\"Maximize the ratio of **between-class scatter** to **within-class scatter**:\")\n    text(\"$$J(w) = \\\\frac{w^T S_B w}{w^T S_W w}$$\")\n    text(\"- $S_B$: Between-Class Scatter (how far apart the group means are).\")\n    text(\"- $S_W$: Within-Class Scatter (how spread out each group is internally).\")\n    text(\"Optimal projection direction: $w = S_W^{-1}(m_1 - m_2)$.\")\n    image(\"images/separation.png\", width=600)\n\n    text(\"### Geometric Intuition\")\n    text(\"Example: Houses on the market with price, age, size, distance to public transport and number of rooms\")\n    iframe(\"lda-explorable/index.html\", height=2000)\n\n    text(\"### Scenario\")\n    text(\"Suppose you're a real-estate analyst and you want to predict whether a listed house will be a fast seller (sold within a month) or a slow seller (sat on the market for several months).\")\n    text(\"$$J(w) = \\\\frac{w^T S_B w}{w^T S_W w}$$\")\n    text(\"\\nYou describe each house with two features:\")\n    text(\"- $x_1$ = floor area ($m^2$)\")\n    text(\"- $x_2$ = distance to the city center (km)\")\n    \n    text(\"3 houses per class\")\n    image(\"images/lda_table1.png\", width=600)\n\n    text(\"### Step 1: Class Means\")\n    text(\"The mean vector of a class is just the average of each feature over that class's houses.\")\n\n    image(\"images/lda_eq1.png\", width=600)\n    text(\"The mean difference is the vector pointing from one class center to the other:\")\n    image(\"images/lda_eq2.png\", width=200)\n    \n    text(\"### Step 2: Within-class scatter matrices\")\n    image(\"images/lda_step2.png\", width=600)\n\n    text(\"### Step 3:  The between-class scatter (what we're maximizing)\")\n    text(\"The between-class scatter captures how far apart the class centers are:\")\n    image(\"images/lda_step3.png\", width=600)\n\n    text(\"### Step 4:  Solve for the optimal direction\")\n    image(\"images/lda_step4.png\", width=600)\n\n    text(\"### Live Demo \u2014 LDA Projection\")\n    code_cell(\"\"\"\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# ---------------------------------------------------------------------------\n# 1. Data  (each row = one house: [floor_area_m2, distance_km])\n# ---------------------------------------------------------------------------\nfast = np.array([[120, 3],\n                 [100, 5],\n                 [140, 4]], dtype=float)   # Class 1: sold within a month\n\nslow = np.array([[ 80,  9],\n                 [ 60, 11],\n                 [100, 10]], dtype=float)  # Class 2: took several months\n\n# ---------------------------------------------------------------------------\n# 2. Class means  ->  m = (1/N) * sum(x)\n# ---------------------------------------------------------------------------\nm1 = fast.mean(axis=0)          # mean of class 1\nm2 = slow.mean(axis=0)          # mean of class 2\nprint(\"m1 (fast) =\", m1)        # [120.  4.]\nprint(\"m2 (slow) =\", m2)        # [ 80. 10.]\n\n# ---------------------------------------------------------------------------\n# 3. Within-class scatter  ->  S_i = sum (x - m)(x - m)^T ,   S_W = S1 + S2\n# ---------------------------------------------------------------------------\ndef scatter(X, m):\n    d = X - m                    # deviations from the class mean\n    return d.T @ d               # sums the outer products for us\n\nS1 = scatter(fast, m1)\nS2 = scatter(slow, m2)\nS_W = S1 + S2\nprint(\"S_W =\"); print(S_W)       # [[1600. -40.] [-40.   4.]]\n\n# ---------------------------------------------------------------------------\n# 4. Fisher direction  ->  w = S_W^{-1} (m1 - m2)\n# ---------------------------------------------------------------------------\nw = np.linalg.solve(S_W, m1 - m2)   # solve is more stable than inv()\nw = w / w[0]                        # rescale so w[0] = 1  ->  ~[1, 100]\nprint(\"w =\", w)                     # [  1. 100.]\n\n# ---------------------------------------------------------------------------\n# 5. Threshold  ->  midpoint of the projected means\n# ---------------------------------------------------------------------------\nc = w @ (m1 + m2) / 2\nprint(\"threshold c =\", c)           # 800.0\n\ndef classify(x):\n    y = w @ np.asarray(x, dtype=float)\n    return \"fast\" if y < c else \"slow\"\n\nprint(\"90 m2, 8 km  ->\", classify([90, 8]))    # slow\nprint(\"130 m2, 4 km ->\", classify([130, 4]))   # fast\n\n# ---------------------------------------------------------------------------\n# 6. Plot\n# ---------------------------------------------------------------------------\nfig, ax = plt.subplots(figsize=(7, 5))\n\nax.scatter(fast[:, 0], fast[:, 1], c=\"#1baf7a\", s=90, label=\"Fast sellers\")\nax.scatter(slow[:, 0], slow[:, 1], c=\"#eb6834\", s=90, label=\"Slow sellers\")\n\n# class means as diamonds\nax.scatter(*m1, c=\"#199e70\", marker=\"D\", s=160, edgecolors=\"white\",\n           linewidths=1.5, label=\"Fast mean\")\nax.scatter(*m2, c=\"#d95926\", marker=\"D\", s=160, edgecolors=\"white\",\n           linewidths=1.5, label=\"Slow mean\")\n\n# decision boundary:  w0*x1 + w1*x2 = c  ->  x2 = (c - w0*x1) / w1\nx1_line = np.linspace(50, 150, 200)\nx2_line = (c - w[0] * x1_line) / w[1]\nax.plot(x1_line, x2_line, \"--\", c=\"#888780\", lw=2,\n        label=\"Decision boundary\")\n\nax.set_xlabel(\"Floor area (m$^2$)\")\nax.set_ylabel(\"Distance to center (km)\")\nax.set_title(\"Fisher's Linear Discriminant\")\nax.set_xlim(50, 150)\nax.set_ylim(2, 12)\nax.legend(loc=\"upper right\", frameon=False)\nax.grid(True, alpha=0.3)\n\nplt.tight_layout()\nplt.show()\n\"\"\")\n\n\n############################################################\n# 2. Logistic Regression\n\ndef sigmoid(z: float) -> float:\n    return 1.0 / (1.0 + math.exp(-z))\n\n\ndef logistic_regression():\n    text(\"## 2. Logistic Regression\")\n    link(cox_1958), link(bishop_2006)\n    text(\"Despite its name, Logistic Regression is a **classifier**.\")\n    text(\"Instead of a blunt yes/no answer, it outputs a **probability** between 0% and 100%.\")\n\n    text(\"### The Analogy: The Weather Forecaster\")\n    text(\"A Perceptron-style robot says: 'It will rain. Yes or No.'\")\n    text(\"A Logistic Regression robot behaves like a meteorologist: 'There is an **82% chance** of rain today.'\")\n    text(\"You then apply a threshold \u2014 if chance > 50%, pack an umbrella.\")\n\n    text(\"### The Mathematical Concept \u2014 the Sigmoid Function\")\n    text(\"$$\\\\sigma(z) = \\\\frac{1}{1 + e^{-z}}$$\")\n    text(\"- $z$ is any real-valued score.\")\n    text(\"- Output is always in $(0, 1)$ \u2014 a valid probability.\")\n    text(\"- When $z = 0$: $\\\\sigma(0) = 0.5$ (50% confidence).\")\n    text(\"- Large positive $z$ \u2192 probability near 1.0.\")\n    text(\"- Large negative $z$ \u2192 probability near 0.0.\")\n\n    s_zero  = sigmoid(0.0)    # @inspect s_zero\n    s_pos   = sigmoid(3.0)    # @inspect s_pos\n    s_neg   = sigmoid(-3.0)   # @inspect s_neg\n\n    text(\"### Scenario: Will a student pass an exam?\")\n    text(\"Suppose we've built a tiny logistic regression model that predicts the probability a student passes based on hours studied. The model has learned two numbers (its parameters):\")\n    text(\"$$weight = 0.6, \\\\quad bias = -3$$\")\n    \n    text(\"We want to predict the pass probability for a student who studied **6 hours.**\")\n\n    text(\"### Step 1: Compute z (the linear part)\")\n    text(\"First we combine the input with the model's parameters:\")\n    text(\"$$z = w \\\\cdot x + b$$\")\n    text(\"For our example:\")\n    text(\"$$z = 0.6 \\\\times 6 + (-3) = 0.6$$\")\n    text(\"So **z = 0.6**\")\n\n    text(\"### Step 2: Plug z into the sigmoid\")\n    text(\"$$p = \\\\sigma(z) = \\\\frac{1}{1 + e^{-0.6}} \\\\approx 0.645$$\")\n\n    text(\"### Step 3: Interpret the result\")\n    text(\"The model predicts a **64.5% chance** of passing the exam.\")\n\n\n############################################################\n# 3. Perceptron\n\n@dataclass\nclass PerceptronParams:\n    weights: list[float]\n    bias: float\n\n\ndef dot(a: list[float], b: list[float]) -> float:\n    return sum(ai * bi for ai, bi in zip(a, b))\n\n\ndef perceptron():\n    text(\"## 3. The Perceptron\")\n    link(rosenblatt_1958)\n\n    text(\"### Definition\")\n    text(\"The Perceptron is the simplest type of artificial neural network and one of the earliest algorithms designed for **supervised binary classification** (sorting data into exactly two classes).\")\n    text(\"It was introduced by Frank Rosenblatt in **1958**.\")\n    text(\"*\\\"The Perceptron looks at a set of numbers describing something, multiplies each number by how important it is, adds them up, and decides which of two classes the thing belongs to.\\\"*\")\n    image(\"images/perceptron.png\", width=600)\n    text(\"### The Perceptron Formula\")\n    text(\"The entire decision-making process can be written as a single mathematical formula:\")\n    text(\"$$y = f(w_1 x_1 + w_2 x_2 + \\\\cdots + w_n x_n + b)$$\")\n    text(\"This is often written more compactly using summation notation:\")\n    text(\"$$y = f\\\\!\\\\left(\\\\sum_{i=1}^{n} w_i x_i + b\\\\right)$$\")\n\n    text(\"### Breakdown of the Formula\")\n    text(\"| Symbol | Name |\\n|---|---|\\n| $x_1, x_2, \\\\ldots, x_n$ | Inputs / Features |\\n| $w_1, w_2, \\\\ldots, w_n$ | Weights |\\n| $b$ | Bias |\\n| $\\\\sum (w_i \\\\cdot x_i)$ | Weighted Sum / Net Input |\\n| $f(\\\\,)$ | Activation Function |\\n| $y$ | Output |\")\n\n    text(\"### The Step (Activation) Function\")\n    text(\"The classic Perceptron activation function is the **step function**:\")\n    text(\"$$f(z) = \\\\begin{cases} 1 & \\\\text{if } z \\\\geq 0 \\\\\\\\ 0 & \\\\text{if } z < 0 \\\\end{cases}$$\")\n\n    text(\"### How the Perceptron Separates the Classes\")\n    text(\"**The Decision Boundary:** The equation $\\\\sum w_i x_i + b = 0$ is literally the equation of a **line** (2 features) or a **flat plane** (more features). This line is called the **decision boundary**.\")\n    text(\"**Separating the Class Fields:** Before computing, identify which columns are *features* (inputs) and which is the *target* (the class label you check against).\")\n\n    text(\"### Example 1: AND Logic Gate\")\n    text(\"Given weights (already trained): $w_1 = 1$, $w_2 = 1$, bias $b = -1.5$\")\n    and_data: list[tuple[int, int, int]] = [\n        (0, 0, 0),\n        (0, 1, 0),\n        (1, 0, 0),\n        (1, 1, 1),\n    ]  # @inspect and_data\n    image(\"images/perceptron_example1_1.png\", width=600)\n    text(\"**Step 1:** Write the formula for this problem:\")\n    text(\"$$z = (w_1 \\\\cdot x_1) + (w_2 \\\\cdot x_2) + b$$\")\n    w1_and = 1.0   # @inspect w1_and\n    w2_and = 1.0   # @inspect w2_and\n    b_and  = -1.5  # @inspect b_and\n    text(\"$$z = (1)(x_1) + (1)(x_2) + (-1.5)$$\")\n\n    text(\"**Step 2:** Substitute each row's feature values and apply the step function.\")\n    image(\"images/perceptron_example1_2.png\", width=600)\n\n    text(\"**Step 3:** Separate the classes.\")\n    text(\"The decision boundary is $x_1 + x_2 - 1.5 = 0$, or rewritten as $x_2 = 1.5 - x_1$.\")\n    text(\"Only the point $(1, 1)$ lands above this line, correctly isolating the single Class 1 point from the three Class 0 points.\")\n\n    image(\"images/perceptron_example1_3.png\", width=600)\n    text(\"### Example 2: Training the Perceptron\")\n    link(novikoff_1962)\n    text(\"The perceptron is **guaranteed to converge** when data is linearly separable.\")\n    text(\"Starting point: $w_1 = 0$, $w_2 = 0$, $b = 0$, learning rate $\\\\eta = 1$\")\n    text(\"$$z = (w_1 \\\\cdot x_1) + (w_2 \\\\cdot x_2) + b$$\")\n    text(\"**Learning rule:**\")\n    text(\"$$w_{i,\\\\text{new}} = w_{i,\\\\text{old}} + \\\\eta(t - y) \\\\cdot x_i$$\")\n    text(\"$$b_{\\\\text{new}} = b_{\\\\text{old}} + \\\\eta(t - y)$$\")\n    image(\"images/perceptron_example2.png\", width=600)\n\n    text(\"### Live Demo \u2014 Perceptron Training\")\n    code_cell(\"\"\"\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# AND gate dataset\nX = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)\ny = np.array([0, 0, 0, 1])\n\n# Train perceptron from scratch\nw = np.array([0.0, 0.0])\nb = 0.0\neta = 1.0\nepoch_errors = []\n\nfor epoch in range(20):\n    errors = 0\n    for xi, ti in zip(X, y):\n        yi = 1 if (w @ xi + b) >= 0 else 0\n        if yi != ti:\n            w += eta * (ti - yi) * xi\n            b += eta * (ti - yi)\n            errors += 1\n    epoch_errors.append(errors)\n    if errors == 0:\n        break\n\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))\n\n# Left: learned decision boundary\ncolors = ['steelblue' if c == 0 else 'tomato' for c in y]\nax1.scatter(X[:,0], X[:,1], c=colors, s=150, zorder=3, edgecolors='black')\nfor xi, lbl in zip(X, ['(0,0)\u21920','(0,1)\u21920','(1,0)\u21920','(1,1)\u21921']):\n    ax1.annotate(lbl, xi, textcoords='offset points', xytext=(8, 5), fontsize=9)\nif abs(w[1]) > 1e-6:\n    x1v = np.linspace(-0.5, 1.5, 100)\n    ax1.plot(x1v, (-w[0]*x1v - b) / w[1], 'k--', lw=1.5,\n             label=f'w=[{w[0]:.1f}, {w[1]:.1f}], b={b:.1f}')\nax1.set_xlim(-0.5, 1.5); ax1.set_ylim(-0.5, 1.5)\nax1.set_title('AND Gate \u2014 Learned Decision Boundary')\nax1.legend(fontsize=8); ax1.set_aspect('equal'); ax1.grid(True, alpha=0.3)\n\n# Right: misclassifications per epoch\nax2.bar(range(1, len(epoch_errors)+1), epoch_errors, color='steelblue', alpha=0.7)\nax2.set_xlabel('Epoch'); ax2.set_ylabel('Misclassifications')\nax2.set_title(f'Training Errors per Epoch')\nax2.set_xticks(range(1, len(epoch_errors)+1))\n\nplt.tight_layout()\nplt.show()\nprint(f\"Converged in {len(epoch_errors)} epoch(s)\")\nprint(f\"Final: w1={w[0]:.1f}, w2={w[1]:.1f}, bias={b:.1f}\")\n\"\"\")\n\n    text(\"### The XOR Problem: Perceptron's Hard Limit\")\n    link(minsky_papert_1969)\n    text(\"The perceptron only works when data is **linearly separable**.\")\n    text(\"XOR cannot be solved by any single straight line:\")\n    xor_data: list[tuple[list[float], int]] = [\n        ([0.0, 0.0], 0),\n        ([1.0, 1.0], 0),\n        ([0.0, 1.0], 1),\n        ([1.0, 0.0], 1),\n    ]  # @inspect xor_data\n    text(\"No hyperplane can separate these four points \u2014 this limitation motivated multi-layer networks.\")\n\n\n############################################################\n# 4. Linear SVM\n\ndef hinge_loss(score: float, y: int) -> float:\n    return max(0.0, 1.0 - y * score)\n\n\ndef linear_svm():\n    text(\"## 4. Linear Support Vector Machine (Linear SVM)\")\n    link(cortes_vapnik_1995)\n\n    text(\"### Definition\")\n    text(\"A Linear Support Vector Machine is a supervised machine learning algorithm used for **binary classification**.\")\n    text(\"It finds the optimal separating **hyperplane** (a straight line in 2D, a flat plane in 3D) that divides two classes while **maximizing the margin** \u2014 the empty buffer zone between the boundary and the nearest data points of each class.\")\n    text(\"*Linear SVM draws the single straight line that is as far away as possible from the nearest points of both classes, and those nearest points are the **support vectors** that pin the line in place.*\")\n    image(\"images/lsvm.png\", width=600)\n    text(\"### The Linear SVM Formula\")\n    text(\"Just like the Perceptron, Linear SVM uses a weighted sum plus bias \u2014 the **decision function**:\")\n    text(\"$$f(x) = w \\\\cdot x + b = w_1 x_1 + w_2 x_2 + \\\\cdots + w_n x_n + b$$\")\n    text(\"The predicted class uses the **sign function** instead of a step function:\")\n    text(\"$$y = \\\\text{sign}(w \\\\cdot x + b) = \\\\begin{cases} +1 & \\\\text{if } w \\\\cdot x + b \\\\geq 0 \\\\\\\\ -1 & \\\\text{if } w \\\\cdot x + b < 0 \\\\end{cases}$$\")\n\n    text(\"### Breakdown of the Formula\")\n    text(\"| Symbol | Name |\\n|---|---|\\n| $x = (x_1, \\\\ldots, x_n)$ | Feature vector |\\n| $w = (w_1, \\\\ldots, w_n)$ | Weight vector |\\n| $b$ | Bias / Intercept |\\n| $w \\\\cdot x + b$ | Decision function |\\n| $\\\\text{sign}(\\\\,)$ | Sign function |\\n| $y_i$ | True class label |\\n| $\\\\|w\\\\|$ | Norm (magnitude) of $w$ |\\n| Support vectors | \u2014 |\")\n\n    text(\"### The Margin\")\n    text(\"SVM does not just draw one line \u2014 it conceptually draws **three parallel lines**: the decision boundary in the middle, and two margin boundaries on either side touching the nearest points of each class:\")\n    text(\"- **Positive margin boundary:** $w \\\\cdot x + b = +1$\")\n    text(\"- **Negative margin boundary:** $w \\\\cdot x + b = -1$\")\n    text(\"The distance between these two margin boundaries is the **margin**, calculated directly from the length of $w$:\")\n    text(\"$$\\\\text{Margin width} = \\\\frac{2}{\\\\|w\\\\|}$$\")\n\n    text(\"### How Linear SVM Separates the Classes\")\n    text(\"**The Decision Boundary and the Margin 'Street':** The equation $w \\\\cdot x + b = 0$ is the decision boundary, exactly as in the Perceptron. But SVM adds two more parallel lines ($w \\\\cdot x + b = 1$ and $w \\\\cdot x + b = -1$) that mark the edges of the widest possible empty street between the classes.\")\n    text(\"**Support Vectors \u2014 The Points That Actually Matter:** Once trained, most points are irrelevant to the final boundary. Only the points where $y_i(w \\\\cdot x_i + b) = 1$ \u2014 sitting exactly on the margin boundaries \u2014 are the **support vectors**.\")\n    text(\"**Separating the Class Fields:** Identify which columns are *features* ($x_1, x_2, \\\\ldots$) and which is the *target label* $y \\\\in \\\\{-1, +1\\\\}$.\")\n\n    text(\"### Example 1: Classifying Points with a Trained Linear SVM\")\n    text(\"Given trained weights: $w = (1,\\\\, 1)$, bias $b = -5$\")\n    svm_points: list[tuple[str, float, float, int]] = [\n        (\"P1\", 0.0, 1.0, -1),\n        (\"P2\", 1.0, 3.0, -1),\n        (\"P3\", 4.0, 2.0, +1),\n        (\"P4\", 5.0, 4.0, +1),\n    ]  # @inspect svm_points\n\n    text(\"**Step 1:** Write the decision function for this problem:\")\n    text(\"$$f(x) = (1)(x_1) + (1)(x_2) + (-5) = x_1 + x_2 - 5$$\")\n    w1_svm = 1.0   # @inspect w1_svm\n    w2_svm = 1.0   # @inspect w2_svm\n    b_svm  = -5.0  # @inspect b_svm\n    image(\"images/svm_1_1.png\", width=600)\n    text(\"**Step 2:** Substitute each point's feature values and apply the sign function.\")\n    f_p1 = w1_svm * svm_points[0][1] + w2_svm * svm_points[0][2] + b_svm  # @inspect f_p1\n    y_p1 = 1 if f_p1 >= 0 else -1  # @inspect y_p1\n    f_p2 = w1_svm * svm_points[1][1] + w2_svm * svm_points[1][2] + b_svm  # @inspect f_p2\n    y_p2 = 1 if f_p2 >= 0 else -1  # @inspect y_p2\n    f_p3 = w1_svm * svm_points[2][1] + w2_svm * svm_points[2][2] + b_svm  # @inspect f_p3\n    y_p3 = 1 if f_p3 >= 0 else -1  # @inspect y_p3\n    f_p4 = w1_svm * svm_points[3][1] + w2_svm * svm_points[3][2] + b_svm  # @inspect f_p4\n    y_p4 = 1 if f_p4 >= 0 else -1  # @inspect y_p4\n\n    image(\"images/svm_1_23.png\", width=600)\n    text(\"**Step 3:** Separate the classes.\")\n    text(\"The decision boundary is $x_1 + x_2 - 5 = 0$, or rewritten as $x_2 = 5 - x_1$.\")\n    text(\"The **sign** of $f(x)$ determines the label: $f(x) < 0 \\\\Rightarrow -1$, $f(x) > 0 \\\\Rightarrow +1$.\")\n\n    text(\"### Example 2: Identifying the Support Vectors\")\n    text(\"**Step 1:** For every point compute the **functional margin** $y_i \\\\times f(x_i)$.\")\n    text(\"A value of exactly **1** means the point sits precisely on its margin boundary.\")\n    fm_p1 = svm_points[0][3] * f_p1  # @inspect fm_p1\n    fm_p2 = svm_points[1][3] * f_p2  # @inspect fm_p2\n    fm_p3 = svm_points[2][3] * f_p3  # @inspect fm_p3\n    fm_p4 = svm_points[3][3] * f_p4  # @inspect fm_p4\n    image(\"images/svm_2_1.png\", width=600)\n    text(\"**Step 2:** Interpret \u2014 P2 ($y \\\\times f = 1$) and P3 ($y \\\\times f = 1$) are the **support vectors**. P1 and P4 are far inside the safe zone.\")\n\n    text(\"### Example 3: Computing the Margin Width\")\n    text(\"**Step 1:** Compute the norm of the weight vector:\")\n    text(\"$$\\\\|w\\\\| = \\\\sqrt{w_1^2 + w_2^2} = \\\\sqrt{1^2 + 1^2} = \\\\sqrt{2} \\\\approx 1.414$$\")\n    norm_w = math.sqrt(w1_svm**2 + w2_svm**2)  # @inspect norm_w\n    image(\"images/svm_3_1.png\", width=600)\n\n    text(\"**Step 2:** Apply the margin formula:\")\n    text(\"$$\\\\text{Margin width} = \\\\frac{2}{\\\\|w\\\\|} = \\\\frac{2}{\\\\sqrt{2}} \\\\approx 1.414$$\")\n    margin_width = 2.0 / norm_w  # @inspect margin_width\n\n    text(\"**Step 3:** Write the two margin boundary equations using $b = -5$:\")\n    text(\"- **Positive margin boundary:** $x_1 + x_2 - 5 = +1 \\\\Rightarrow x_1 + x_2 = 6$\")\n    text(\"- **Negative margin boundary:** $x_1 + x_2 - 5 = -1 \\\\Rightarrow x_1 + x_2 = 4$\")\n    text(\"**Step 4:** Interpret \u2014 P2 lies on $x_1 + x_2 = 4$ and P3 lies on $x_1 + x_2 = 6$. Moving any other point leaves the boundary unchanged; moving a support vector shifts it.\")\n    text(\"### Live Demo \u2014 Linear SVM\")\n    code_cell(\"\"\"\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport matplotlib.patches as mpatches\n\n# \u2500\u2500 Data & parameters (edit these!) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\npoints = [(\"P1\", 0.0, 1.0, -1),\n          (\"P2\", 1.0, 3.0, -1),\n          (\"P3\", 4.0, 2.0, +1),\n          (\"P4\", 5.0, 4.0, +1)]\nw1, w2, b = 1.0, 1.0, -5.0\n# \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\nnorm_w = np.sqrt(w1**2 + w2**2)\nmargin = 2.0 / norm_w\n\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))\n\n# \u2500\u2500 Left: scatter + decision boundary + margins \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nclr = {-1: 'steelblue', +1: 'tomato'}\nx1v = np.linspace(-1, 7, 300)\n\nax1.plot(x1v, (-w1*x1v - b    ) / w2, 'k-',  lw=2,   label='Decision boundary (f=0)')\nax1.plot(x1v, (-w1*x1v - b + 1) / w2, 'r--', lw=1.5, label='Positive margin (f=+1)')\nax1.plot(x1v, (-w1*x1v - b - 1) / w2, 'b--', lw=1.5, label='Negative margin (f=\u22121)')\nax1.fill_between(x1v,\n                 (-w1*x1v - b - 1) / w2,\n                 (-w1*x1v - b + 1) / w2,\n                 alpha=0.08, color='gray')\n\nfor name, x1c, x2c, label in points:\n    f  = w1*x1c + w2*x2c + b\n    fm = label * f\n    is_sv = abs(fm - 1.0) < 1e-6\n    ax1.scatter(x1c, x2c, c=clr[label], s=180, zorder=4,\n                edgecolors='gold', linewidths=3.5 if is_sv else 0)\n    ax1.annotate(f'{name}  f={f:.1f}', (x1c, x2c),\n                 textcoords='offset points', xytext=(8, 5), fontsize=9)\n\nax1.set_xlim(-1, 7); ax1.set_ylim(-1, 7)\nax1.set_title(f'SVM: w=[{w1},{w2}], b={b}  |  margin={margin:.3f}')\nax1.set_xlabel('x\u2081'); ax1.set_ylabel('x\u2082'); ax1.grid(True, alpha=0.3)\nblue_p = mpatches.Patch(color='steelblue', label='Class \u22121')\nred_p  = mpatches.Patch(color='tomato',    label='Class +1')\ngold_p = mpatches.Patch(color='gold',      label='Support Vector (ring)')\nax1.legend(handles=[blue_p, red_p, gold_p], fontsize=8, loc='upper left')\n\n# \u2500\u2500 Right: functional-margin bar chart \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nnames, fms, bclrs = [], [], []\nfor name, x1c, x2c, label in points:\n    f  = w1*x1c + w2*x2c + b\n    fm = label * f\n    names.append(name)\n    fms.append(fm)\n    bclrs.append('gold' if abs(fm - 1.0) < 1e-6 else 'steelblue')\n\nbars = ax2.bar(names, fms, color=bclrs, edgecolor='black', alpha=0.85)\nax2.axhline(1.0, color='crimson', ls='--', lw=1.5, label='Margin threshold (=1)')\nfor bar, fm in zip(bars, fms):\n    ax2.text(bar.get_x() + bar.get_width()/2, fm + 0.05, f'{fm:.1f}',\n             ha='center', fontsize=11, fontweight='bold')\nax2.set_ylabel('y \u00b7 f(x)'); ax2.set_title('Functional Margins  (gold = support vector)')\nax2.legend(fontsize=9); ax2.grid(True, alpha=0.3, axis='y')\n\nplt.tight_layout()\nplt.show()\n\n# \u2500\u2500 Console summary \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nprint(f\"||w|| = {norm_w:.4f}   |   Margin = 2/||w|| = {margin:.4f}\")\nprint()\nprint(f\"{'Point':>5} | {'f(x)':>6} | {'y':>3} | {'y*f(x)':>7} | Support Vector?\")\nprint(\"-\" * 46)\nfor name, x1c, x2c, label in points:\n    f  = w1*x1c + w2*x2c + b\n    fm = label * f\n    sv = \"YES\" if abs(fm - 1.0) < 1e-6 else \"no\"\n    print(f\"  {name:>3}  | {f:>6.1f} | {label:>+3} | {fm:>7.1f} | {sv}\")\n\"\"\")\n\n\n############################################################\n# Evaluation Metrics\n\ndef evaluation_metrics():\n    text(\"## Evaluation Metrics\")\n    text(\"**Accuracy alone can mislead.** If 99% of emails are safe, always predicting 'safe' gives 99% accuracy \u2014 but catches zero spam.\")\n\n    text(\"### Confusion Matrix\")\n    text(\"| | Predicted \u22121 (No) | Predicted +1 (Yes) |\\n|---|---|---|\\n| **Actual \u22121** | TN (True Negative) | FP (False Positive) |\\n| **Actual +1** | FN (False Negative) | TP (True Positive) |\")\n    \n    text(\"| # | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |\\n|---|---|---|---|---|---|---|---|---|---|---|\\n| **True** | 1 | 0 | 1 | 1 | 0 | 0 | 1 | 0 | 1 | 0 |\\n| **Pred** | 1 | 0 | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 0 |\")\n    text(\"### Live Demo \u2014 Confusion Matrix & Metrics\")\n    code_cell(\"\"\"\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# \u2500\u2500 Edit these to experiment \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\ny_true = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]\ny_pred = [1, 0, 1, 0, 0, 1, 1, 0, 0, 0]\n# \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\nyt = np.array(y_true)\nyp = np.array(y_pred)\n\nTP = int(((yt == 1) & (yp == 1)).sum())\nTN = int(((yt == 0) & (yp == 0)).sum())\nFP = int(((yt == 0) & (yp == 1)).sum())\nFN = int(((yt == 1) & (yp == 0)).sum())\n\nprec = TP / (TP + FP) if (TP + FP) > 0 else 0.0\nrec  = TP / (TP + FN) if (TP + FN) > 0 else 0.0\nf1   = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0\nacc  = (TP + TN) / len(yt)\n\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))\n\n# \u2500\u2500 Left: confusion matrix heatmap \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\ncm_arr = np.array([[TN, FP], [FN, TP]])\nax1.imshow(cm_arr, cmap='Blues', vmin=0, vmax=max(cm_arr.max(), 1))\nax1.set_xticks([0, 1])\nax1.set_yticks([0, 1])\nax1.set_xticklabels(['Predicted 0 (Neg)', 'Predicted 1 (Pos)'], fontsize=10)\nax1.set_yticklabels(['Actual 0 (Neg)', 'Actual 1 (Pos)'], fontsize=10)\nax1.set_xlabel('Predicted Label', fontsize=11)\nax1.set_ylabel('Actual Label', fontsize=11)\ncell_names = [['TN', 'FP'], ['FN', 'TP']]\nthresh = max(cm_arr.max() / 2.0, 1)\nfor i in range(2):\n    for j in range(2):\n        txt_color = 'white' if cm_arr[i, j] >= thresh else 'black'\n        ax1.text(j, i, f'{cell_names[i][j]}\\\\n{cm_arr[i, j]}',\n                 ha='center', va='center', fontsize=14,\n                 fontweight='bold', color=txt_color)\nax1.set_title('Confusion Matrix', fontsize=13, fontweight='bold')\n\n# \u2500\u2500 Right: metrics bar chart \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nbar_labels  = ['Precision', 'Recall', 'F1', 'Accuracy']\nbar_values  = [prec, rec, f1, acc]\nbar_colors  = ['steelblue', 'tomato', 'seagreen', 'mediumpurple']\nbars = ax2.bar(bar_labels, bar_values, color=bar_colors, alpha=0.85, edgecolor='black')\nfor bar, val in zip(bars, bar_values):\n    ax2.text(bar.get_x() + bar.get_width() / 2, val + 0.02, f'{val:.2f}',\n             ha='center', fontsize=11, fontweight='bold')\nax2.set_ylim(0, 1.15)\nax2.set_title('Evaluation Metrics', fontsize=13, fontweight='bold')\nax2.grid(True, alpha=0.3, axis='y')\n\nplt.tight_layout()\nplt.show()\n\nprint(f\"TP={TP}  TN={TN}  FP={FP}  FN={FN}\")\nprint(f\"Precision : {prec:.4f}\")\nprint(f\"Recall    : {rec:.4f}\")\nprint(f\"F1        : {f1:.4f}\")\nprint(f\"Accuracy  : {acc:.4f}\")\n\"\"\")\n    text(\"### Precision, Recall, F1\")\n    text(\"**Precision**: of all predicted positives, how many were truly positive?\")\n    text(\"$$\\\\text{Precision} = \\\\frac{TP}{TP + FP}$$\")\n    text(\"**Recall**: of all true positives, how many did we catch?\")\n    text(\"$$\\\\text{Recall} = \\\\frac{TP}{TP + FN}$$\")\n    text(\"**F1**: harmonic mean of precision and recall.\")\n    text(\"$$F_1 = 2 \\\\cdot \\\\frac{\\\\text{Precision} \\\\times \\\\text{Recall}}{\\\\text{Precision} + \\\\text{Recall}}$$\")\n    text(\"### When to use each metric\")\n    text(\"- **Precision** matters when false positives are costly (spam filter \u2014 don't block real emails).\")\n    text(\"- **Recall** matters when false negatives are costly (disease screening \u2014 don't miss sick patients).\")\n    text(\"- **F1** balances both; useful with imbalanced class distributions.\")\n    text(\"- **Accuracy** works when classes are balanced and all errors equally bad.\")\n\n    \n\n    text(\"### Algorithm Quick Reference \u2014 Covered in Depth\")\n    text(\"| Algorithm | Analogy | Output | Best For |\\n|---|---|---|---|\\n| Perceptron | Strict Club Bouncer | Hard Binary | Simple binary tasks |\\n| Logistic Regression | Weather Forecaster | Probability | When confidence matters |\\n| Linear SVM | Highway Construction | Margin Distance | Maximizing safety and generalization |\\n| Fisher's LDA | Flashlights & Shadows | 1D Projection | Statistical group separation |\")\n\n    text(\"### Other Linear Classifiers (Overview)\")\n    text(\"| Algorithm | Analogy | Key Idea |\\n|---|---|---|\\n| Ridge Classifier | Cautious Investor | L2 penalty keeps weights small and balanced |\\n| Passive-Aggressive | Driving Instructor | Silent when correct; aggressive correction on error |\\n| SGD Classifier | Blindfolded Hiker | Optimization framework \u2014 any loss, one sample at a time |\\n| Discriminant Functions | Video Game Scoring | One score formula per class; pick the highest |\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
+    "lecture_linear_classification.py": "import math\nimport random\nfrom dataclasses import dataclass\n\nfrom execute_util import link, image, text, code_cell, iframe\nfrom lecture_util import article_link, youtube_link\nfrom references_linclass import (\n    rosenblatt_1958, novikoff_1962, minsky_papert_1969,\n    cox_1958, cortes_vapnik_1995,\n    fisher_1936, hoerl_kennard_1970, crammer_2006, bishop_2006,\n)\n\n\ndef main():\n    welcome()\n    what_is_classification()\n    linear_classification_overview()\n    lda()\n    logistic_regression()\n    perceptron()\n    linear_svm()\n    evaluation_metrics()\n\n\n############################################################\n\ndef welcome():\n    text(\"## Linear Classification Techniques\")\n    text(\"**Presenters**: AJ Barcelona, A De Guzman, J Gambito\")\n    text(\"University of the Cordilleras - Linear Techniques and Machine Learning\")\n\n############################################################\n\ndef what_is_classification():\n    text(\"## Recap: Supervised vs. Unsupervised Learning\")\n    image(\"images/ai_ml_dl.png\", width=300)\n    text(\"## Supervised Learning: Two broad categories\")\n    text(\"## Classification vs. Regression\")\n    text(\"**Regression** predicts a *continuous* value \u2014 e.g., predicting Alex Eala's score next match.\")\n    text(\"**Classification** predicts a *discrete class label* \u2014 e.g., spam or not-spam.\")\n    text(\"### Binary Classification\")\n    text(\"**Two classes:** output is 0 or 1 (Yes/No, Pass/Fail).\")\n    text(\"**Examples:** email spam filter, bank loan approval, medical risk flagging.\")\n\n    text(\"### Multiclass Classification\")\n    text(\"**More than two classes:** news categories, book subjects, student streams.\")\n    text(\"A problem can be binary *or* multiclass depending on how we define the classes.\")\n    text(\"Sentiment analysis is binary ('positive'/'negative') but becomes multiclass if we add 'neutral'.\")\n\n    text(\"### How classification works \u2014 five steps\")\n    steps: list[str] = []\n    steps.append(\"Data Collection: gather labeled examples.\")        # @inspect steps\n    steps.append(\"Feature Extraction: identify attributes that distinguish classes.\")  # @inspect steps\n    steps.append(\"Model Training: learn patterns connecting features to labels.\")      # @inspect steps\n    steps.append(\"Model Evaluation: test on unseen data to measure accuracy.\")        # @inspect steps\n    steps.append(\"Prediction: classify new inputs using learned patterns.\")            # @inspect steps\n\n\n############################################################\n\ndef linear_classification_overview():\n    text(\"## What is Linear Classification?\")\n    text(\"A linear classifier summarizes training data into a fixed set of **weights** $w$ and a **bias** $b$.\")\n    text(\"It computes a score as a dot product:\")\n    text(\"$$\\\\text{score}(x) = w \\\\cdot x + b$$\")\n    text(\"- $x$ = feature vector\")\n    text(\"- $w$ = weights (importance of each feature)\")\n    text(\"- $b$ = bias (baseline offset)\")\n\n    text(\"### Decision rule\")\n    text(\"If $\\\\text{score}(x) >= 75$ \u2192 **Class A**.\")\n    text(\"If $\\\\text{score}(x) <  75$ \u2192 **Class B**.\")\n    text(\"The boundary where score = 0 is called the **Decision Boundary** (a hyperplane).\")\n\n    text(\"### Linear vs. Non-linear Classifiers\")\n    text(\"**Linear** classifiers draw a straight boundary \u2014 fast, interpretable, great for large datasets:\")\n    linear_examples: list[str] = [\n        \"LDA\",\n        \"Logistic Regression\",\n        \"Perceptron\",\n        \"Linear SVM\",\n        \"SGD Classifier\",\n        \"Ridge Classifier\",\n        \"Passive-Aggressive Classifier\",\n        \"Linear Discriminant Functions\",\n    ]  # @inspect linear_examples\n\n    text(\"**Non-linear** classifiers draw curved boundaries \u2014 more powerful but slower and harder to interpret:\")\n    nonlinear_examples: list[str] = [\n        \"K-Nearest Neighbours\",\n        \"Kernel SVM\",\n        \"Decision Trees\",\n        \"Random Forests\",\n        \"Multi-layer Neural Networks\",\n    ]  # @inspect nonlinear_examples\n    text(\"\")\n\n############################################################\n# 1. LDA\n\ndef lda():\n    text(\"## 1. Linear Discriminant Analysis (LDA)\")\n    link(fisher_1936)\n    text(\"LDA is a statistical classification technique that works by **projection**.\")\n    text(\"It collapses high-dimensional data onto a single line, choosing the angle that maximizes class separation.\")\n    image(\"images/pca_lda.webp\", width=600)\n    image(\"images/lda_diagram_2.webp\", width=400)\n    text(\"### Introduction\")\n    text(\"To deal with classification problems with 2 or more classes, most Machine Learning (ML) algorithms work the same way.\")\n    \n    text(\"Usually, they apply some kind of transformation to the input data with the effect of **reducing the original input dimensions to a new (smaller) one**\")\n    \n    text(\"The goal is to project the data to a new space.\")\n    text(\"Then, once projected, they try to classify the data points by finding a linear separation.\")\n\n    text(\"Suppose we want to classify the red and blue circles correctly.\")\n    image(\"images/linearly-inseperable-data.png\", width=300)\n    text(\"What if we could transform the data so that we could draw a line that separates the 2 classes?\")\n    image(\"images/feature_transformation.png\", width=600)\n\n    text(\"### What is dimensionality and what is dimensionality reduction?\")\n    image(\"images/dimensionality_reduction.webp\", width=600)\n    image(\"images/dimensionality_reduction_2.webp\", width=600)\n\n    text(\"### The Mathematical Concept \u2014 Fisher's Criterion\")\n    text(\"Maximize the ratio of **between-class scatter** to **within-class scatter**:\")\n    text(\"$$J(w) = \\\\frac{w^T S_B w}{w^T S_W w}$$\")\n    text(\"- $S_B$: Between-Class Scatter (how far apart the group means are).\")\n    text(\"- $S_W$: Within-Class Scatter (how spread out each group is internally).\")\n    text(\"Optimal projection direction: $w = S_W^{-1}(m_1 - m_2)$.\")\n    image(\"images/separation.png\", width=600)\n\n    text(\"### Geometric Intuition\")\n    text(\"Example: Houses on the market with price, age, size, distance to public transport and number of rooms\")\n    iframe(\"lda-explorable/index.html\", height=2000)\n\n    text(\"### Scenario\")\n    text(\"Suppose you're a real-estate analyst and you want to predict whether a listed house will be a fast seller (sold within a month) or a slow seller (sat on the market for several months).\")\n    text(\"\\nYou describe each house with two features:\")\n    text(\"- $x_1$ = floor area ($m^2$)\")\n    text(\"- $x_2$ = distance to the city center (km)\")\n    \n    text(\"3 houses per class\")\n    image(\"images/lda_table1.png\", width=600)\n\n    text(\"### Step 1: Class Means\")\n    text(\"The mean vector of a class is just the average of each feature over that class's houses.\")\n\n    image(\"images/lda_eq1.png\", width=600)\n    text(\"The mean difference is the vector pointing from one class center to the other:\")\n    image(\"images/lda_eq2.png\", width=200)\n    \n    text(\"### Step 2: Within-class scatter matrices\")\n    image(\"images/lda_step2.png\", width=600)\n\n    text(\"### Step 3:  The between-class scatter (what we're maximizing)\")\n    text(\"The between-class scatter captures how far apart the class centers are:\")\n    image(\"images/lda_step3.png\", width=600)\n\n    text(\"### Step 4:  Solve for the optimal direction\")\n    image(\"images/lda_step4.png\", width=600)\n\n\n    image(\"images/lda_3formula.png\", width=600)\n\n    text(\"### Live Demo \u2014 LDA Projection\")\n    code_cell(\"\"\"\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nfast = np.array([[120, 3],\n                 [100, 5],\n                 [140, 4]], dtype=float)   # Class 1: sold within a month\n\nslow = np.array([[ 80,  9],\n                 [ 60, 11],\n                 [100, 10]], dtype=float)  # Class 2: took several months\n\n# ---------------------------------------------------------------------------\n# 1. Class means  ->  m = (1/N) * sum(x)\n# ---------------------------------------------------------------------------\nm1 = fast.mean(axis=0)          # mean of class 1\nm2 = slow.mean(axis=0)          # mean of class 2\nprint(\"m1 (fast) =\", m1)        # [120.  4.]\nprint(\"m2 (slow) =\", m2)        # [ 80. 10.]\n\n# ---------------------------------------------------------------------------\n# 2. Within-class scatter  ->  S_i = sum (x - m)(x - m)^T ,   S_W = S1 + S2\n# ---------------------------------------------------------------------------\ndef scatter(X, m):\n    d = X - m                    # deviations from the class mean\n    return d.T @ d               # sums the outer products for us\n\nS1 = scatter(fast, m1)\nS2 = scatter(slow, m2)\nS_W = S1 + S2\nprint(\"S_W =\"); print(S_W)       # [[1600. -40.] [-40.   4.]]\n\n# ---------------------------------------------------------------------------\n# 3. Fisher direction  ->  w = S_W^{-1} (m1 - m2)\n# ---------------------------------------------------------------------------\nw = np.linalg.solve(S_W, m1 - m2)   # solve is more stable than inv()\nw = w / w[0]                        # rescale so w[0] = 1  ->  ~[1, 100]\nprint(\"w =\", w)                     # [  1. 100.]\n\n# ---------------------------------------------------------------------------\n# 4. Threshold  ->  midpoint of the projected means\n# ---------------------------------------------------------------------------\nc = w @ (m1 + m2) / 2\nprint(\"threshold c =\", c)           # 800.0\n\ndef classify(x):\n    y = w @ np.asarray(x, dtype=float)\n    return \"fast\" if y < c else \"slow\"\n\nprint(\"90 m2, 8 km  ->\", classify([90, 8]))    # slow\nprint(\"130 m2, 4 km ->\", classify([130, 4]))   # fast\n\n# ---------------------------------------------------------------------------\n# 5. Plot\n# ---------------------------------------------------------------------------\nfig, ax = plt.subplots(figsize=(7, 5))\n\nax.scatter(fast[:, 0], fast[:, 1], c=\"#1baf7a\", s=90, label=\"Fast sellers\")\nax.scatter(slow[:, 0], slow[:, 1], c=\"#eb6834\", s=90, label=\"Slow sellers\")\n\n# class means as diamonds\nax.scatter(*m1, c=\"#199e70\", marker=\"D\", s=160, edgecolors=\"white\",\n           linewidths=1.5, label=\"Fast mean\")\nax.scatter(*m2, c=\"#d95926\", marker=\"D\", s=160, edgecolors=\"white\",\n           linewidths=1.5, label=\"Slow mean\")\n\n# decision boundary:  w0*x1 + w1*x2 = c  ->  x2 = (c - w0*x1) / w1\nx1_line = np.linspace(50, 150, 200)\nx2_line = (c - w[0] * x1_line) / w[1]\nax.plot(x1_line, x2_line, \"--\", c=\"#888780\", lw=2,\n        label=\"Decision boundary\")\n\nax.set_xlabel(\"Floor area (m$^2$)\")\nax.set_ylabel(\"Distance to center (km)\")\nax.set_title(\"Fisher's Linear Discriminant\")\nax.set_xlim(50, 150)\nax.set_ylim(2, 12)\nax.legend(loc=\"upper right\", frameon=False)\nax.grid(True, alpha=0.3)\n\nplt.tight_layout()\nplt.show()\n\"\"\")\n\n\n############################################################\n# 2. Logistic Regression\n\ndef sigmoid(z: float) -> float:\n    return 1.0 / (1.0 + math.exp(-z))\n\n\ndef logistic_regression():\n    text(\"## 2. Logistic Regression\")\n    link(cox_1958), link(bishop_2006)\n    text(\"Despite its name, Logistic Regression is a **classifier**.\")\n    text(\"Instead of a blunt yes/no answer, it outputs a **probability** between 0% and 100%.\")\n\n    text(\"### The Analogy: The Weather Forecaster\")\n    text(\"A Perceptron-style robot says: 'It will rain. Yes or No.'\")\n    text(\"A Logistic Regression robot behaves like a meteorologist: 'There is an **82% chance** of rain today.'\")\n    text(\"You then apply a threshold \u2014 if chance > 50%, pack an umbrella.\")\n\n    text(\"### The Mathematical Concept \u2014 the Sigmoid Function\")\n    text(\"$$\\\\sigma(z) = \\\\frac{1}{1 + e^{-z}}$$\")\n    text(\"- $z$ is any real-valued score.\")\n    text(\"- Output is always in $(0, 1)$ \u2014 a valid probability.\")\n    text(\"- When $z = 0$: $\\\\sigma(0) = 0.5$ (50% confidence).\")\n    text(\"- Large positive $z$ \u2192 probability near 1.0.\")\n    text(\"- Large negative $z$ \u2192 probability near 0.0.\")\n\n    s_zero  = sigmoid(0.0)    # @inspect s_zero\n    s_pos   = sigmoid(3.0)    # @inspect s_pos\n    s_neg   = sigmoid(-3.0)   # @inspect s_neg\n\n    text(\"### Scenario: Will a student pass an exam?\")\n    text(\"Suppose we've built a tiny logistic regression model that predicts the probability a student passes based on hours studied. The model has learned two numbers (its parameters):\")\n    text(\"$$weight = 0.6, \\\\quad bias = -3$$\")\n    \n    text(\"We want to predict the pass probability for a student who studied **6 hours.**\")\n\n    text(\"### Step 1: Compute z (the linear part)\")\n    text(\"First we combine the input with the model's parameters:\")\n    text(\"$$z = w \\\\cdot x + b$$\")\n    text(\"For our example:\")\n    text(\"$$z = 0.6 \\\\times 6 + (-3) = 0.6$$\")\n    text(\"So **z = 0.6**\")\n\n    text(\"### Step 2: Plug z into the sigmoid\")\n    text(\"$$p = \\\\sigma(z) = \\\\frac{1}{1 + e^{-0.6}} \\\\approx 0.645$$\")\n\n    text(\"### Step 3: Interpret the result\")\n    text(\"The model predicts a **64.5% chance** of passing the exam.\")\n\n\n############################################################\n# 3. Perceptron\n\n@dataclass\nclass PerceptronParams:\n    weights: list[float]\n    bias: float\n\n\ndef dot(a: list[float], b: list[float]) -> float:\n    return sum(ai * bi for ai, bi in zip(a, b))\n\n\ndef perceptron():\n    text(\"## 3. The Perceptron\")\n    link(rosenblatt_1958)\n\n    text(\"### Definition\")\n    text(\"The Perceptron is the simplest type of artificial neural network and one of the earliest algorithms designed for **supervised binary classification** (sorting data into exactly two classes).\")\n    text(\"It was introduced by Frank Rosenblatt in **1958**.\")\n    text(\"*\\\"The Perceptron looks at a set of numbers describing something, multiplies each number by how important it is, adds them up, and decides which of two classes the thing belongs to.\\\"*\")\n    image(\"images/perceptron.png\", width=600)\n    text(\"### The Perceptron Formula\")\n    text(\"The entire decision-making process can be written as a single mathematical formula:\")\n    text(\"$$y = f(w_1 x_1 + w_2 x_2 + \\\\cdots + w_n x_n + b)$$\")\n    text(\"This is often written more compactly using summation notation:\")\n    text(\"$$y = f\\\\!\\\\left(\\\\sum_{i=1}^{n} w_i x_i + b\\\\right)$$\")\n\n    text(\"### Breakdown of the Formula\")\n    text(\"| Symbol | Name |\\n|---|---|\\n| $x_1, x_2, \\\\ldots, x_n$ | Inputs / Features |\\n| $w_1, w_2, \\\\ldots, w_n$ | Weights |\\n| $b$ | Bias |\\n| $\\\\sum (w_i \\\\cdot x_i)$ | Weighted Sum / Net Input |\\n| $f(\\\\,)$ | Activation Function |\\n| $y$ | Output |\")\n\n    text(\"### The Step (Activation) Function\")\n    text(\"The classic Perceptron activation function is the **step function**:\")\n    text(\"$$f(z) = \\\\begin{cases} 1 & \\\\text{if } z \\\\geq 0 \\\\\\\\ 0 & \\\\text{if } z < 0 \\\\end{cases}$$\")\n\n    text(\"### How the Perceptron Separates the Classes\")\n    text(\"**The Decision Boundary:** The equation $\\\\sum w_i x_i + b = 0$ is literally the equation of a **line** (2 features) or a **flat plane** (more features). This line is called the **decision boundary**.\")\n    text(\"**Separating the Class Fields:** Before computing, identify which columns are *features* (inputs) and which is the *target* (the class label you check against).\")\n\n    text(\"### Example 1: AND Logic Gate\")\n    text(\"Given weights (already trained): $w_1 = 1$, $w_2 = 1$, bias $b = -1.5$\")\n    and_data: list[tuple[int, int, int]] = [\n        (0, 0, 0),\n        (0, 1, 0),\n        (1, 0, 0),\n        (1, 1, 1),\n    ]  # @inspect and_data\n    image(\"images/perceptron_example1_1.png\", width=600)\n    text(\"**Step 1:** Write the formula for this problem:\")\n    text(\"$$z = (w_1 \\\\cdot x_1) + (w_2 \\\\cdot x_2) + b$$\")\n    w1_and = 1.0   # @inspect w1_and\n    w2_and = 1.0   # @inspect w2_and\n    b_and  = -1.5  # @inspect b_and\n    text(\"$$z = (1)(x_1) + (1)(x_2) + (-1.5)$$\")\n\n    text(\"**Step 2:** Substitute each row's feature values and apply the step function.\")\n    image(\"images/perceptron_example1_2.png\", width=600)\n\n    text(\"**Step 3:** Separate the classes.\")\n    text(\"The decision boundary is $x_1 + x_2 - 1.5 = 0$, or rewritten as $x_2 = 1.5 - x_1$.\")\n    text(\"Only the point $(1, 1)$ lands above this line, correctly isolating the single Class 1 point from the three Class 0 points.\")\n\n    image(\"images/perceptron_example1_3.png\", width=600)\n    text(\"### Example 2: Training the Perceptron\")\n    link(novikoff_1962)\n    text(\"The perceptron is **guaranteed to converge** when data is linearly separable.\")\n    text(\"Starting point: $w_1 = 0$, $w_2 = 0$, $b = 0$, learning rate $\\\\eta = 1$\")\n    text(\"$$z = (w_1 \\\\cdot x_1) + (w_2 \\\\cdot x_2) + b$$\")\n    text(\"**Learning rule:**\")\n    text(\"$$w_{i,\\\\text{new}} = w_{i,\\\\text{old}} + \\\\eta(t - y) \\\\cdot x_i$$\")\n    text(\"$$b_{\\\\text{new}} = b_{\\\\text{old}} + \\\\eta(t - y)$$\")\n    image(\"images/perceptron_example2.png\", width=600)\n\n    text(\"### Live Demo \u2014 Perceptron Training\")\n    code_cell(\"\"\"\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# AND gate dataset\nX = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)\ny = np.array([0, 0, 0, 1])\n\n# Train perceptron from scratch\nw = np.array([0.0, 0.0])\nb = 0.0\neta = 1.0\nepoch_errors = []\n\nfor epoch in range(20):\n    errors = 0\n    for xi, ti in zip(X, y):\n        yi = 1 if (w @ xi + b) >= 0 else 0\n        if yi != ti:\n            w += eta * (ti - yi) * xi\n            b += eta * (ti - yi)\n            errors += 1\n    epoch_errors.append(errors)\n    if errors == 0:\n        break\n\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))\n\n# Left: learned decision boundary\ncolors = ['steelblue' if c == 0 else 'tomato' for c in y]\nax1.scatter(X[:,0], X[:,1], c=colors, s=150, zorder=3, edgecolors='black')\nfor xi, lbl in zip(X, ['(0,0)\u21920','(0,1)\u21920','(1,0)\u21920','(1,1)\u21921']):\n    ax1.annotate(lbl, xi, textcoords='offset points', xytext=(8, 5), fontsize=9)\nif abs(w[1]) > 1e-6:\n    x1v = np.linspace(-0.5, 1.5, 100)\n    ax1.plot(x1v, (-w[0]*x1v - b) / w[1], 'k--', lw=1.5,\n             label=f'w=[{w[0]:.1f}, {w[1]:.1f}], b={b:.1f}')\nax1.set_xlim(-0.5, 1.5); ax1.set_ylim(-0.5, 1.5)\nax1.set_title('AND Gate \u2014 Learned Decision Boundary')\nax1.legend(fontsize=8); ax1.set_aspect('equal'); ax1.grid(True, alpha=0.3)\n\n# Right: misclassifications per epoch\nax2.bar(range(1, len(epoch_errors)+1), epoch_errors, color='steelblue', alpha=0.7)\nax2.set_xlabel('Epoch'); ax2.set_ylabel('Misclassifications')\nax2.set_title(f'Training Errors per Epoch')\nax2.set_xticks(range(1, len(epoch_errors)+1))\n\nplt.tight_layout()\nplt.show()\nprint(f\"Converged in {len(epoch_errors)} epoch(s)\")\nprint(f\"Final: w1={w[0]:.1f}, w2={w[1]:.1f}, bias={b:.1f}\")\n\"\"\")\n\n    text(\"### The XOR Problem: Perceptron's Hard Limit\")\n    link(minsky_papert_1969)\n    text(\"The perceptron only works when data is **linearly separable**.\")\n    text(\"XOR cannot be solved by any single straight line:\")\n    xor_data: list[tuple[list[float], int]] = [\n        ([0.0, 0.0], 0),\n        ([1.0, 1.0], 0),\n        ([0.0, 1.0], 1),\n        ([1.0, 0.0], 1),\n    ]  # @inspect xor_data\n    text(\"No hyperplane can separate these four points \u2014 this limitation motivated multi-layer networks.\")\n\n\n############################################################\n# 4. Linear SVM\n\ndef hinge_loss(score: float, y: int) -> float:\n    return max(0.0, 1.0 - y * score)\n\n\ndef linear_svm():\n    text(\"## 4. Linear Support Vector Machine (Linear SVM)\")\n    link(cortes_vapnik_1995)\n\n    text(\"### Definition\")\n    text(\"A Linear Support Vector Machine is a supervised machine learning algorithm used for **binary classification**.\")\n    text(\"It finds the optimal separating **hyperplane** (a straight line in 2D, a flat plane in 3D) that divides two classes while **maximizing the margin** \u2014 the empty buffer zone between the boundary and the nearest data points of each class.\")\n    text(\"*Linear SVM draws the single straight line that is as far away as possible from the nearest points of both classes, and those nearest points are the **support vectors** that pin the line in place.*\")\n    image(\"images/lsvm.png\", width=600)\n    text(\"### The Linear SVM Formula\")\n    text(\"Just like the Perceptron, Linear SVM uses a weighted sum plus bias \u2014 the **decision function**:\")\n    text(\"$$f(x) = w \\\\cdot x + b = w_1 x_1 + w_2 x_2 + \\\\cdots + w_n x_n + b$$\")\n    text(\"The predicted class uses the **sign function** instead of a step function:\")\n    text(\"$$y = \\\\text{sign}(w \\\\cdot x + b) = \\\\begin{cases} +1 & \\\\text{if } w \\\\cdot x + b \\\\geq 0 \\\\\\\\ -1 & \\\\text{if } w \\\\cdot x + b < 0 \\\\end{cases}$$\")\n\n    text(\"### Breakdown of the Formula\")\n    text(\"| Symbol | Name |\\n|---|---|\\n| $x = (x_1, \\\\ldots, x_n)$ | Feature vector |\\n| $w = (w_1, \\\\ldots, w_n)$ | Weight vector |\\n| $b$ | Bias / Intercept |\\n| $w \\\\cdot x + b$ | Decision function |\\n| $\\\\text{sign}(\\\\,)$ | Sign function |\\n| $y_i$ | True class label |\\n| $\\\\|w\\\\|$ | Norm (magnitude) of $w$ |\\n| Support vectors | \u2014 |\")\n\n    text(\"### The Margin\")\n    text(\"SVM does not just draw one line \u2014 it conceptually draws **three parallel lines**: the decision boundary in the middle, and two margin boundaries on either side touching the nearest points of each class:\")\n    text(\"- **Positive margin boundary:** $w \\\\cdot x + b = +1$\")\n    text(\"- **Negative margin boundary:** $w \\\\cdot x + b = -1$\")\n    text(\"The distance between these two margin boundaries is the **margin**, calculated directly from the length of $w$:\")\n    text(\"$$\\\\text{Margin width} = \\\\frac{2}{\\\\|w\\\\|}$$\")\n\n    text(\"### How Linear SVM Separates the Classes\")\n    text(\"**The Decision Boundary and the Margin 'Street':** The equation $w \\\\cdot x + b = 0$ is the decision boundary, exactly as in the Perceptron. But SVM adds two more parallel lines ($w \\\\cdot x + b = 1$ and $w \\\\cdot x + b = -1$) that mark the edges of the widest possible empty street between the classes.\")\n    text(\"**Support Vectors \u2014 The Points That Actually Matter:** Once trained, most points are irrelevant to the final boundary. Only the points where $y_i(w \\\\cdot x_i + b) = 1$ \u2014 sitting exactly on the margin boundaries \u2014 are the **support vectors**.\")\n    text(\"**Separating the Class Fields:** Identify which columns are *features* ($x_1, x_2, \\\\ldots$) and which is the *target label* $y \\\\in \\\\{-1, +1\\\\}$.\")\n\n    text(\"### Example 1: Classifying Points with a Trained Linear SVM\")\n    text(\"Given trained weights: $w = (1,\\\\, 1)$, bias $b = -5$\")\n    svm_points: list[tuple[str, float, float, int]] = [\n        (\"P1\", 0.0, 1.0, -1),\n        (\"P2\", 1.0, 3.0, -1),\n        (\"P3\", 4.0, 2.0, +1),\n        (\"P4\", 5.0, 4.0, +1),\n    ]  # @inspect svm_points\n\n    text(\"**Step 1:** Write the decision function for this problem:\")\n    text(\"$$f(x) = (1)(x_1) + (1)(x_2) + (-5) = x_1 + x_2 - 5$$\")\n    w1_svm = 1.0   # @inspect w1_svm\n    w2_svm = 1.0   # @inspect w2_svm\n    b_svm  = -5.0  # @inspect b_svm\n    image(\"images/svm_1_1.png\", width=600)\n    text(\"**Step 2:** Substitute each point's feature values and apply the sign function.\")\n    f_p1 = w1_svm * svm_points[0][1] + w2_svm * svm_points[0][2] + b_svm  # @inspect f_p1\n    y_p1 = 1 if f_p1 >= 0 else -1  # @inspect y_p1\n    f_p2 = w1_svm * svm_points[1][1] + w2_svm * svm_points[1][2] + b_svm  # @inspect f_p2\n    y_p2 = 1 if f_p2 >= 0 else -1  # @inspect y_p2\n    f_p3 = w1_svm * svm_points[2][1] + w2_svm * svm_points[2][2] + b_svm  # @inspect f_p3\n    y_p3 = 1 if f_p3 >= 0 else -1  # @inspect y_p3\n    f_p4 = w1_svm * svm_points[3][1] + w2_svm * svm_points[3][2] + b_svm  # @inspect f_p4\n    y_p4 = 1 if f_p4 >= 0 else -1  # @inspect y_p4\n\n    image(\"images/svm_1_23.png\", width=600)\n    text(\"**Step 3:** Separate the classes.\")\n    text(\"The decision boundary is $x_1 + x_2 - 5 = 0$, or rewritten as $x_2 = 5 - x_1$.\")\n    text(\"The **sign** of $f(x)$ determines the label: $f(x) < 0 \\\\Rightarrow -1$, $f(x) > 0 \\\\Rightarrow +1$.\")\n\n    text(\"### Example 2: Identifying the Support Vectors\")\n    text(\"**Step 1:** For every point compute the **functional margin** $y_i \\\\times f(x_i)$.\")\n    text(\"A value of exactly **1** means the point sits precisely on its margin boundary.\")\n    fm_p1 = svm_points[0][3] * f_p1  # @inspect fm_p1\n    fm_p2 = svm_points[1][3] * f_p2  # @inspect fm_p2\n    fm_p3 = svm_points[2][3] * f_p3  # @inspect fm_p3\n    fm_p4 = svm_points[3][3] * f_p4  # @inspect fm_p4\n    image(\"images/svm_2_1.png\", width=600)\n    text(\"**Step 2:** Interpret \u2014 P2 ($y \\\\times f = 1$) and P3 ($y \\\\times f = 1$) are the **support vectors**. P1 and P4 are far inside the safe zone.\")\n\n    text(\"### Example 3: Computing the Margin Width\")\n    text(\"**Step 1:** Compute the norm of the weight vector:\")\n    text(\"$$\\\\|w\\\\| = \\\\sqrt{w_1^2 + w_2^2} = \\\\sqrt{1^2 + 1^2} = \\\\sqrt{2} \\\\approx 1.414$$\")\n    norm_w = math.sqrt(w1_svm**2 + w2_svm**2)  # @inspect norm_w\n    image(\"images/svm_3_1.png\", width=600)\n\n    text(\"**Step 2:** Apply the margin formula:\")\n    text(\"$$\\\\text{Margin width} = \\\\frac{2}{\\\\|w\\\\|} = \\\\frac{2}{\\\\sqrt{2}} \\\\approx 1.414$$\")\n    margin_width = 2.0 / norm_w  # @inspect margin_width\n\n    text(\"**Step 3:** Write the two margin boundary equations using $b = -5$:\")\n    text(\"- **Positive margin boundary:** $x_1 + x_2 - 5 = +1 \\\\Rightarrow x_1 + x_2 = 6$\")\n    text(\"- **Negative margin boundary:** $x_1 + x_2 - 5 = -1 \\\\Rightarrow x_1 + x_2 = 4$\")\n    text(\"**Step 4:** Interpret \u2014 P2 lies on $x_1 + x_2 = 4$ and P3 lies on $x_1 + x_2 = 6$. Moving any other point leaves the boundary unchanged; moving a support vector shifts it.\")\n    text(\"### Live Demo \u2014 Linear SVM\")\n    code_cell(\"\"\"\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport matplotlib.patches as mpatches\n\n# \u2500\u2500 Data & parameters (edit these!) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\npoints = [(\"P1\", 0.0, 1.0, -1),\n          (\"P2\", 1.0, 3.0, -1),\n          (\"P3\", 4.0, 2.0, +1),\n          (\"P4\", 5.0, 4.0, +1)]\nw1, w2, b = 1.0, 1.0, -5.0\n# \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\nnorm_w = np.sqrt(w1**2 + w2**2)\nmargin = 2.0 / norm_w\n\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))\n\n# \u2500\u2500 Left: scatter + decision boundary + margins \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nclr = {-1: 'steelblue', +1: 'tomato'}\nx1v = np.linspace(-1, 7, 300)\n\nax1.plot(x1v, (-w1*x1v - b    ) / w2, 'k-',  lw=2,   label='Decision boundary (f=0)')\nax1.plot(x1v, (-w1*x1v - b + 1) / w2, 'r--', lw=1.5, label='Positive margin (f=+1)')\nax1.plot(x1v, (-w1*x1v - b - 1) / w2, 'b--', lw=1.5, label='Negative margin (f=\u22121)')\nax1.fill_between(x1v,\n                 (-w1*x1v - b - 1) / w2,\n                 (-w1*x1v - b + 1) / w2,\n                 alpha=0.08, color='gray')\n\nfor name, x1c, x2c, label in points:\n    f  = w1*x1c + w2*x2c + b\n    fm = label * f\n    is_sv = abs(fm - 1.0) < 1e-6\n    ax1.scatter(x1c, x2c, c=clr[label], s=180, zorder=4,\n                edgecolors='gold', linewidths=3.5 if is_sv else 0)\n    ax1.annotate(f'{name}  f={f:.1f}', (x1c, x2c),\n                 textcoords='offset points', xytext=(8, 5), fontsize=9)\n\nax1.set_xlim(-1, 7); ax1.set_ylim(-1, 7)\nax1.set_title(f'SVM: w=[{w1},{w2}], b={b}  |  margin={margin:.3f}')\nax1.set_xlabel('x\u2081'); ax1.set_ylabel('x\u2082'); ax1.grid(True, alpha=0.3)\nblue_p = mpatches.Patch(color='steelblue', label='Class \u22121')\nred_p  = mpatches.Patch(color='tomato',    label='Class +1')\ngold_p = mpatches.Patch(color='gold',      label='Support Vector (ring)')\nax1.legend(handles=[blue_p, red_p, gold_p], fontsize=8, loc='upper left')\n\n# \u2500\u2500 Right: functional-margin bar chart \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nnames, fms, bclrs = [], [], []\nfor name, x1c, x2c, label in points:\n    f  = w1*x1c + w2*x2c + b\n    fm = label * f\n    names.append(name)\n    fms.append(fm)\n    bclrs.append('gold' if abs(fm - 1.0) < 1e-6 else 'steelblue')\n\nbars = ax2.bar(names, fms, color=bclrs, edgecolor='black', alpha=0.85)\nax2.axhline(1.0, color='crimson', ls='--', lw=1.5, label='Margin threshold (=1)')\nfor bar, fm in zip(bars, fms):\n    ax2.text(bar.get_x() + bar.get_width()/2, fm + 0.05, f'{fm:.1f}',\n             ha='center', fontsize=11, fontweight='bold')\nax2.set_ylabel('y \u00b7 f(x)'); ax2.set_title('Functional Margins  (gold = support vector)')\nax2.legend(fontsize=9); ax2.grid(True, alpha=0.3, axis='y')\n\nplt.tight_layout()\nplt.show()\n\n# \u2500\u2500 Console summary \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nprint(f\"||w|| = {norm_w:.4f}   |   Margin = 2/||w|| = {margin:.4f}\")\nprint()\nprint(f\"{'Point':>5} | {'f(x)':>6} | {'y':>3} | {'y*f(x)':>7} | Support Vector?\")\nprint(\"-\" * 46)\nfor name, x1c, x2c, label in points:\n    f  = w1*x1c + w2*x2c + b\n    fm = label * f\n    sv = \"YES\" if abs(fm - 1.0) < 1e-6 else \"no\"\n    print(f\"  {name:>3}  | {f:>6.1f} | {label:>+3} | {fm:>7.1f} | {sv}\")\n\"\"\")\n\n\n############################################################\n# Evaluation Metrics\n\ndef evaluation_metrics():\n    text(\"## Evaluation Metrics\")\n    text(\"**Accuracy alone can mislead.** If 99% of emails are safe, always predicting 'safe' gives 99% accuracy \u2014 but catches zero spam.\")\n\n    text(\"### Confusion Matrix\")\n    text(\"| | Predicted \u22121 (No) | Predicted +1 (Yes) |\\n|---|---|---|\\n| **Actual \u22121** | TN (True Negative) | FP (False Positive) |\\n| **Actual +1** | FN (False Negative) | TP (True Positive) |\")\n    \n    text(\"| # | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |\\n|---|---|---|---|---|---|---|---|---|---|---|\\n| **True** | 1 | 0 | 1 | 1 | 0 | 0 | 1 | 0 | 1 | 0 |\\n| **Pred** | 1 | 0 | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 0 |\")\n    text(\"### Live Demo \u2014 Confusion Matrix & Metrics\")\n    code_cell(\"\"\"\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n# \u2500\u2500 Edit these to experiment \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\ny_true = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]\ny_pred = [1, 0, 1, 0, 0, 1, 1, 0, 0, 0]\n# \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\nyt = np.array(y_true)\nyp = np.array(y_pred)\n\nTP = int(((yt == 1) & (yp == 1)).sum())\nTN = int(((yt == 0) & (yp == 0)).sum())\nFP = int(((yt == 0) & (yp == 1)).sum())\nFN = int(((yt == 1) & (yp == 0)).sum())\n\nprec = TP / (TP + FP) if (TP + FP) > 0 else 0.0\nrec  = TP / (TP + FN) if (TP + FN) > 0 else 0.0\nf1   = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0\nacc  = (TP + TN) / len(yt)\n\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))\n\n# \u2500\u2500 Left: confusion matrix heatmap \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\ncm_arr = np.array([[TN, FP], [FN, TP]])\nax1.imshow(cm_arr, cmap='Blues', vmin=0, vmax=max(cm_arr.max(), 1))\nax1.set_xticks([0, 1])\nax1.set_yticks([0, 1])\nax1.set_xticklabels(['Predicted 0 (Neg)', 'Predicted 1 (Pos)'], fontsize=10)\nax1.set_yticklabels(['Actual 0 (Neg)', 'Actual 1 (Pos)'], fontsize=10)\nax1.set_xlabel('Predicted Label', fontsize=11)\nax1.set_ylabel('Actual Label', fontsize=11)\ncell_names = [['TN', 'FP'], ['FN', 'TP']]\nthresh = max(cm_arr.max() / 2.0, 1)\nfor i in range(2):\n    for j in range(2):\n        txt_color = 'white' if cm_arr[i, j] >= thresh else 'black'\n        ax1.text(j, i, f'{cell_names[i][j]}\\\\n{cm_arr[i, j]}',\n                 ha='center', va='center', fontsize=14,\n                 fontweight='bold', color=txt_color)\nax1.set_title('Confusion Matrix', fontsize=13, fontweight='bold')\n\n# \u2500\u2500 Right: metrics bar chart \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nbar_labels  = ['Precision', 'Recall', 'F1', 'Accuracy']\nbar_values  = [prec, rec, f1, acc]\nbar_colors  = ['steelblue', 'tomato', 'seagreen', 'mediumpurple']\nbars = ax2.bar(bar_labels, bar_values, color=bar_colors, alpha=0.85, edgecolor='black')\nfor bar, val in zip(bars, bar_values):\n    ax2.text(bar.get_x() + bar.get_width() / 2, val + 0.02, f'{val:.2f}',\n             ha='center', fontsize=11, fontweight='bold')\nax2.set_ylim(0, 1.15)\nax2.set_title('Evaluation Metrics', fontsize=13, fontweight='bold')\nax2.grid(True, alpha=0.3, axis='y')\n\nplt.tight_layout()\nplt.show()\n\nprint(f\"TP={TP}  TN={TN}  FP={FP}  FN={FN}\")\nprint(f\"Precision : {prec:.4f}\")\nprint(f\"Recall    : {rec:.4f}\")\nprint(f\"F1        : {f1:.4f}\")\nprint(f\"Accuracy  : {acc:.4f}\")\n\"\"\")\n    text(\"### Precision, Recall, F1\")\n    text(\"**Precision**: of all predicted positives, how many were truly positive?\")\n    text(\"$$\\\\text{Precision} = \\\\frac{TP}{TP + FP}$$\")\n    text(\"**Recall**: of all true positives, how many did we catch?\")\n    text(\"$$\\\\text{Recall} = \\\\frac{TP}{TP + FN}$$\")\n    text(\"**F1**: harmonic mean of precision and recall.\")\n    text(\"$$F_1 = 2 \\\\cdot \\\\frac{\\\\text{Precision} \\\\times \\\\text{Recall}}{\\\\text{Precision} + \\\\text{Recall}}$$\")\n    text(\"### When to use each metric\")\n    text(\"- **Precision** matters when false positives are costly (spam filter \u2014 don't block real emails).\")\n    text(\"- **Recall** matters when false negatives are costly (disease screening \u2014 don't miss sick patients).\")\n    text(\"- **F1** balances both; useful with imbalanced class distributions.\")\n    text(\"- **Accuracy** works when classes are balanced and all errors equally bad.\")\n\n    \n\n    text(\"### Algorithm Quick Reference \u2014 Covered in Depth\")\n    text(\"| Algorithm | Analogy | Output | Best For |\\n|---|---|---|---|\\n| Perceptron | Strict Club Bouncer | Hard Binary | Simple binary tasks |\\n| Logistic Regression | Weather Forecaster | Probability | When confidence matters |\\n| Linear SVM | Highway Construction | Margin Distance | Maximizing safety and generalization |\\n| Fisher's LDA | Flashlights & Shadows | 1D Projection | Statistical group separation |\")\n\n    text(\"### Other Linear Classifiers (Overview)\")\n    text(\"| Algorithm | Analogy | Key Idea |\\n|---|---|---|\\n| Ridge Classifier | Cautious Investor | L2 penalty keeps weights small and balanced |\\n| Passive-Aggressive | Driving Instructor | Silent when correct; aggressive correction on error |\\n| SGD Classifier | Blindfolded Hiker | Optimization framework \u2014 any loss, one sample at a time |\\n| Discriminant Functions | Video Game Scoring | One score formula per class; pick the highest |\")\n\n\nif __name__ == \"__main__\":\n    main()\n"
   },
   "steps": [
     {
@@ -2161,34 +2161,6 @@
           "path": "lecture_linear_classification.py",
           "line_number": 139,
           "function_name": "lda",
-          "code": "text(\"$$J(w) = \\\\frac{w^T S_B w}{w^T S_W w}$$\")"
-        }
-      ],
-      "env": {},
-      "renderings": [
-        {
-          "type": "markdown",
-          "data": "$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$",
-          "style": {},
-          "external_link": null,
-          "internal_link": null
-        }
-      ],
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "stack": [
-        {
-          "path": "lecture_linear_classification.py",
-          "line_number": 18,
-          "function_name": "main",
-          "code": "lda()"
-        },
-        {
-          "path": "lecture_linear_classification.py",
-          "line_number": 140,
-          "function_name": "lda",
           "code": "text(\"\\nYou describe each house with two features:\")"
         }
       ],
@@ -2215,7 +2187,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 141,
+          "line_number": 140,
           "function_name": "lda",
           "code": "text(\"- $x_1$ = floor area ($m^2$)\")"
         }
@@ -2243,7 +2215,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 142,
+          "line_number": 141,
           "function_name": "lda",
           "code": "text(\"- $x_2$ = distance to the city center (km)\")"
         }
@@ -2271,7 +2243,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 144,
+          "line_number": 143,
           "function_name": "lda",
           "code": "text(\"3 houses per class\")"
         }
@@ -2299,7 +2271,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 145,
+          "line_number": 144,
           "function_name": "lda",
           "code": "image(\"images/lda_table1.png\", width=600)"
         }
@@ -2329,7 +2301,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 147,
+          "line_number": 146,
           "function_name": "lda",
           "code": "text(\"### Step 1: Class Means\")"
         }
@@ -2357,7 +2329,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 148,
+          "line_number": 147,
           "function_name": "lda",
           "code": "text(\"The mean vector of a class is just the average of each feature over that class's houses.\")"
         }
@@ -2385,7 +2357,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 150,
+          "line_number": 149,
           "function_name": "lda",
           "code": "image(\"images/lda_eq1.png\", width=600)"
         }
@@ -2415,7 +2387,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 151,
+          "line_number": 150,
           "function_name": "lda",
           "code": "text(\"The mean difference is the vector pointing from one class center to the other:\")"
         }
@@ -2443,7 +2415,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 152,
+          "line_number": 151,
           "function_name": "lda",
           "code": "image(\"images/lda_eq2.png\", width=200)"
         }
@@ -2473,7 +2445,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 154,
+          "line_number": 153,
           "function_name": "lda",
           "code": "text(\"### Step 2: Within-class scatter matrices\")"
         }
@@ -2501,7 +2473,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 155,
+          "line_number": 154,
           "function_name": "lda",
           "code": "image(\"images/lda_step2.png\", width=600)"
         }
@@ -2531,7 +2503,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 157,
+          "line_number": 156,
           "function_name": "lda",
           "code": "text(\"### Step 3:  The between-class scatter (what we're maximizing)\")"
         }
@@ -2559,7 +2531,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 158,
+          "line_number": 157,
           "function_name": "lda",
           "code": "text(\"The between-class scatter captures how far apart the class centers are:\")"
         }
@@ -2587,7 +2559,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 159,
+          "line_number": 158,
           "function_name": "lda",
           "code": "image(\"images/lda_step3.png\", width=600)"
         }
@@ -2617,7 +2589,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 161,
+          "line_number": 160,
           "function_name": "lda",
           "code": "text(\"### Step 4:  Solve for the optimal direction\")"
         }
@@ -2645,7 +2617,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 162,
+          "line_number": 161,
           "function_name": "lda",
           "code": "image(\"images/lda_step4.png\", width=600)"
         }
@@ -2677,6 +2649,36 @@
           "path": "lecture_linear_classification.py",
           "line_number": 164,
           "function_name": "lda",
+          "code": "image(\"images/lda_3formula.png\", width=600)"
+        }
+      ],
+      "env": {},
+      "renderings": [
+        {
+          "type": "image",
+          "data": "images/lda_3formula.png",
+          "style": {
+            "width": 600
+          },
+          "external_link": null,
+          "internal_link": null
+        }
+      ],
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "stack": [
+        {
+          "path": "lecture_linear_classification.py",
+          "line_number": 18,
+          "function_name": "main",
+          "code": "lda()"
+        },
+        {
+          "path": "lecture_linear_classification.py",
+          "line_number": 166,
+          "function_name": "lda",
           "code": "text(\"### Live Demo \u2014 LDA Projection\")"
         }
       ],
@@ -2703,7 +2705,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 165,
+          "line_number": 167,
           "function_name": "lda",
           "code": "code_cell(\"\"\""
         }
@@ -2712,7 +2714,7 @@
       "renderings": [
         {
           "type": "python_cell",
-          "data": "import numpy as np\nimport matplotlib.pyplot as plt\n\n# ---------------------------------------------------------------------------\n# 1. Data  (each row = one house: [floor_area_m2, distance_km])\n# ---------------------------------------------------------------------------\nfast = np.array([[120, 3],\n                 [100, 5],\n                 [140, 4]], dtype=float)   # Class 1: sold within a month\n\nslow = np.array([[ 80,  9],\n                 [ 60, 11],\n                 [100, 10]], dtype=float)  # Class 2: took several months\n\n# ---------------------------------------------------------------------------\n# 2. Class means  ->  m = (1/N) * sum(x)\n# ---------------------------------------------------------------------------\nm1 = fast.mean(axis=0)          # mean of class 1\nm2 = slow.mean(axis=0)          # mean of class 2\nprint(\"m1 (fast) =\", m1)        # [120.  4.]\nprint(\"m2 (slow) =\", m2)        # [ 80. 10.]\n\n# ---------------------------------------------------------------------------\n# 3. Within-class scatter  ->  S_i = sum (x - m)(x - m)^T ,   S_W = S1 + S2\n# ---------------------------------------------------------------------------\ndef scatter(X, m):\n    d = X - m                    # deviations from the class mean\n    return d.T @ d               # sums the outer products for us\n\nS1 = scatter(fast, m1)\nS2 = scatter(slow, m2)\nS_W = S1 + S2\nprint(\"S_W =\"); print(S_W)       # [[1600. -40.] [-40.   4.]]\n\n# ---------------------------------------------------------------------------\n# 4. Fisher direction  ->  w = S_W^{-1} (m1 - m2)\n# ---------------------------------------------------------------------------\nw = np.linalg.solve(S_W, m1 - m2)   # solve is more stable than inv()\nw = w / w[0]                        # rescale so w[0] = 1  ->  ~[1, 100]\nprint(\"w =\", w)                     # [  1. 100.]\n\n# ---------------------------------------------------------------------------\n# 5. Threshold  ->  midpoint of the projected means\n# ---------------------------------------------------------------------------\nc = w @ (m1 + m2) / 2\nprint(\"threshold c =\", c)           # 800.0\n\ndef classify(x):\n    y = w @ np.asarray(x, dtype=float)\n    return \"fast\" if y < c else \"slow\"\n\nprint(\"90 m2, 8 km  ->\", classify([90, 8]))    # slow\nprint(\"130 m2, 4 km ->\", classify([130, 4]))   # fast\n\n# ---------------------------------------------------------------------------\n# 6. Plot\n# ---------------------------------------------------------------------------\nfig, ax = plt.subplots(figsize=(7, 5))\n\nax.scatter(fast[:, 0], fast[:, 1], c=\"#1baf7a\", s=90, label=\"Fast sellers\")\nax.scatter(slow[:, 0], slow[:, 1], c=\"#eb6834\", s=90, label=\"Slow sellers\")\n\n# class means as diamonds\nax.scatter(*m1, c=\"#199e70\", marker=\"D\", s=160, edgecolors=\"white\",\n           linewidths=1.5, label=\"Fast mean\")\nax.scatter(*m2, c=\"#d95926\", marker=\"D\", s=160, edgecolors=\"white\",\n           linewidths=1.5, label=\"Slow mean\")\n\n# decision boundary:  w0*x1 + w1*x2 = c  ->  x2 = (c - w0*x1) / w1\nx1_line = np.linspace(50, 150, 200)\nx2_line = (c - w[0] * x1_line) / w[1]\nax.plot(x1_line, x2_line, \"--\", c=\"#888780\", lw=2,\n        label=\"Decision boundary\")\n\nax.set_xlabel(\"Floor area (m$^2$)\")\nax.set_ylabel(\"Distance to center (km)\")\nax.set_title(\"Fisher's Linear Discriminant\")\nax.set_xlim(50, 150)\nax.set_ylim(2, 12)\nax.legend(loc=\"upper right\", frameon=False)\nax.grid(True, alpha=0.3)\n\nplt.tight_layout()\nplt.show()",
+          "data": "import numpy as np\nimport matplotlib.pyplot as plt\n\nfast = np.array([[120, 3],\n                 [100, 5],\n                 [140, 4]], dtype=float)   # Class 1: sold within a month\n\nslow = np.array([[ 80,  9],\n                 [ 60, 11],\n                 [100, 10]], dtype=float)  # Class 2: took several months\n\n# ---------------------------------------------------------------------------\n# 1. Class means  ->  m = (1/N) * sum(x)\n# ---------------------------------------------------------------------------\nm1 = fast.mean(axis=0)          # mean of class 1\nm2 = slow.mean(axis=0)          # mean of class 2\nprint(\"m1 (fast) =\", m1)        # [120.  4.]\nprint(\"m2 (slow) =\", m2)        # [ 80. 10.]\n\n# ---------------------------------------------------------------------------\n# 2. Within-class scatter  ->  S_i = sum (x - m)(x - m)^T ,   S_W = S1 + S2\n# ---------------------------------------------------------------------------\ndef scatter(X, m):\n    d = X - m                    # deviations from the class mean\n    return d.T @ d               # sums the outer products for us\n\nS1 = scatter(fast, m1)\nS2 = scatter(slow, m2)\nS_W = S1 + S2\nprint(\"S_W =\"); print(S_W)       # [[1600. -40.] [-40.   4.]]\n\n# ---------------------------------------------------------------------------\n# 3. Fisher direction  ->  w = S_W^{-1} (m1 - m2)\n# ---------------------------------------------------------------------------\nw = np.linalg.solve(S_W, m1 - m2)   # solve is more stable than inv()\nw = w / w[0]                        # rescale so w[0] = 1  ->  ~[1, 100]\nprint(\"w =\", w)                     # [  1. 100.]\n\n# ---------------------------------------------------------------------------\n# 4. Threshold  ->  midpoint of the projected means\n# ---------------------------------------------------------------------------\nc = w @ (m1 + m2) / 2\nprint(\"threshold c =\", c)           # 800.0\n\ndef classify(x):\n    y = w @ np.asarray(x, dtype=float)\n    return \"fast\" if y < c else \"slow\"\n\nprint(\"90 m2, 8 km  ->\", classify([90, 8]))    # slow\nprint(\"130 m2, 4 km ->\", classify([130, 4]))   # fast\n\n# ---------------------------------------------------------------------------\n# 5. Plot\n# ---------------------------------------------------------------------------\nfig, ax = plt.subplots(figsize=(7, 5))\n\nax.scatter(fast[:, 0], fast[:, 1], c=\"#1baf7a\", s=90, label=\"Fast sellers\")\nax.scatter(slow[:, 0], slow[:, 1], c=\"#eb6834\", s=90, label=\"Slow sellers\")\n\n# class means as diamonds\nax.scatter(*m1, c=\"#199e70\", marker=\"D\", s=160, edgecolors=\"white\",\n           linewidths=1.5, label=\"Fast mean\")\nax.scatter(*m2, c=\"#d95926\", marker=\"D\", s=160, edgecolors=\"white\",\n           linewidths=1.5, label=\"Slow mean\")\n\n# decision boundary:  w0*x1 + w1*x2 = c  ->  x2 = (c - w0*x1) / w1\nx1_line = np.linspace(50, 150, 200)\nx2_line = (c - w[0] * x1_line) / w[1]\nax.plot(x1_line, x2_line, \"--\", c=\"#888780\", lw=2,\n        label=\"Decision boundary\")\n\nax.set_xlabel(\"Floor area (m$^2$)\")\nax.set_ylabel(\"Distance to center (km)\")\nax.set_title(\"Fisher's Linear Discriminant\")\nax.set_xlim(50, 150)\nax.set_ylim(2, 12)\nax.legend(loc=\"upper right\", frameon=False)\nax.grid(True, alpha=0.3)\n\nplt.tight_layout()\nplt.show()",
           "style": null,
           "external_link": null,
           "internal_link": null
@@ -2759,7 +2761,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 260,
+          "line_number": 259,
           "function_name": "logistic_regression",
           "code": "def logistic_regression():"
         }
@@ -2779,7 +2781,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 261,
+          "line_number": 260,
           "function_name": "logistic_regression",
           "code": "text(\"## 2. Logistic Regression\")"
         }
@@ -2807,7 +2809,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 262,
+          "line_number": 261,
           "function_name": "logistic_regression",
           "code": "link(cox_1958), link(bishop_2006)"
         }
@@ -2862,7 +2864,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 263,
+          "line_number": 262,
           "function_name": "logistic_regression",
           "code": "text(\"Despite its name, Logistic Regression is a **classifier**.\")"
         }
@@ -2890,7 +2892,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 264,
+          "line_number": 263,
           "function_name": "logistic_regression",
           "code": "text(\"Instead of a blunt yes/no answer, it outputs a **probability** between 0% and 100%.\")"
         }
@@ -2918,7 +2920,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 266,
+          "line_number": 265,
           "function_name": "logistic_regression",
           "code": "text(\"### The Analogy: The Weather Forecaster\")"
         }
@@ -2946,7 +2948,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 267,
+          "line_number": 266,
           "function_name": "logistic_regression",
           "code": "text(\"A Perceptron-style robot says: 'It will rain. Yes or No.'\")"
         }
@@ -2974,7 +2976,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 268,
+          "line_number": 267,
           "function_name": "logistic_regression",
           "code": "text(\"A Logistic Regression robot behaves like a meteorologist: 'There is an **82% chance** of rain today.'\")"
         }
@@ -3002,7 +3004,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 269,
+          "line_number": 268,
           "function_name": "logistic_regression",
           "code": "text(\"You then apply a threshold \u2014 if chance > 50%, pack an umbrella.\")"
         }
@@ -3030,7 +3032,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 271,
+          "line_number": 270,
           "function_name": "logistic_regression",
           "code": "text(\"### The Mathematical Concept \u2014 the Sigmoid Function\")"
         }
@@ -3058,7 +3060,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 272,
+          "line_number": 271,
           "function_name": "logistic_regression",
           "code": "text(\"$$\\\\sigma(z) = \\\\frac{1}{1 + e^{-z}}$$\")"
         }
@@ -3086,7 +3088,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 273,
+          "line_number": 272,
           "function_name": "logistic_regression",
           "code": "text(\"- $z$ is any real-valued score.\")"
         }
@@ -3114,7 +3116,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 274,
+          "line_number": 273,
           "function_name": "logistic_regression",
           "code": "text(\"- Output is always in $(0, 1)$ \u2014 a valid probability.\")"
         }
@@ -3142,7 +3144,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 275,
+          "line_number": 274,
           "function_name": "logistic_regression",
           "code": "text(\"- When $z = 0$: $\\\\sigma(0) = 0.5$ (50% confidence).\")"
         }
@@ -3170,7 +3172,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 276,
+          "line_number": 275,
           "function_name": "logistic_regression",
           "code": "text(\"- Large positive $z$ \u2192 probability near 1.0.\")"
         }
@@ -3198,7 +3200,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 277,
+          "line_number": 276,
           "function_name": "logistic_regression",
           "code": "text(\"- Large negative $z$ \u2192 probability near 0.0.\")"
         }
@@ -3226,7 +3228,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 279,
+          "line_number": 278,
           "function_name": "logistic_regression",
           "code": "s_zero  = sigmoid(0.0)    # @inspect s_zero"
         }
@@ -3246,13 +3248,13 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 279,
+          "line_number": 278,
           "function_name": "logistic_regression",
           "code": "s_zero  = sigmoid(0.0)    # @inspect s_zero"
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 256,
+          "line_number": 255,
           "function_name": "sigmoid",
           "code": "def sigmoid(z: float) -> float:"
         }
@@ -3272,13 +3274,13 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 279,
+          "line_number": 278,
           "function_name": "logistic_regression",
           "code": "s_zero  = sigmoid(0.0)    # @inspect s_zero"
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 257,
+          "line_number": 256,
           "function_name": "sigmoid",
           "code": "return 1.0 / (1.0 + math.exp(-z))"
         }
@@ -3298,7 +3300,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 279,
+          "line_number": 278,
           "function_name": "logistic_regression",
           "code": "s_zero  = sigmoid(0.0)    # @inspect s_zero"
         }
@@ -3320,7 +3322,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 280,
+          "line_number": 279,
           "function_name": "logistic_regression",
           "code": "s_pos   = sigmoid(3.0)    # @inspect s_pos"
         }
@@ -3340,13 +3342,13 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 280,
+          "line_number": 279,
           "function_name": "logistic_regression",
           "code": "s_pos   = sigmoid(3.0)    # @inspect s_pos"
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 256,
+          "line_number": 255,
           "function_name": "sigmoid",
           "code": "def sigmoid(z: float) -> float:"
         }
@@ -3366,13 +3368,13 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 280,
+          "line_number": 279,
           "function_name": "logistic_regression",
           "code": "s_pos   = sigmoid(3.0)    # @inspect s_pos"
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 257,
+          "line_number": 256,
           "function_name": "sigmoid",
           "code": "return 1.0 / (1.0 + math.exp(-z))"
         }
@@ -3392,7 +3394,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 280,
+          "line_number": 279,
           "function_name": "logistic_regression",
           "code": "s_pos   = sigmoid(3.0)    # @inspect s_pos"
         }
@@ -3414,7 +3416,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 281,
+          "line_number": 280,
           "function_name": "logistic_regression",
           "code": "s_neg   = sigmoid(-3.0)   # @inspect s_neg"
         }
@@ -3434,13 +3436,13 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 281,
+          "line_number": 280,
           "function_name": "logistic_regression",
           "code": "s_neg   = sigmoid(-3.0)   # @inspect s_neg"
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 256,
+          "line_number": 255,
           "function_name": "sigmoid",
           "code": "def sigmoid(z: float) -> float:"
         }
@@ -3460,13 +3462,13 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 281,
+          "line_number": 280,
           "function_name": "logistic_regression",
           "code": "s_neg   = sigmoid(-3.0)   # @inspect s_neg"
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 257,
+          "line_number": 256,
           "function_name": "sigmoid",
           "code": "return 1.0 / (1.0 + math.exp(-z))"
         }
@@ -3486,7 +3488,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 281,
+          "line_number": 280,
           "function_name": "logistic_regression",
           "code": "s_neg   = sigmoid(-3.0)   # @inspect s_neg"
         }
@@ -3508,7 +3510,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 283,
+          "line_number": 282,
           "function_name": "logistic_regression",
           "code": "text(\"### Scenario: Will a student pass an exam?\")"
         }
@@ -3536,7 +3538,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 284,
+          "line_number": 283,
           "function_name": "logistic_regression",
           "code": "text(\"Suppose we've built a tiny logistic regression model that predicts the probability a student passes based on hours studied. The model has learned two numbers (its parameters):\")"
         }
@@ -3564,7 +3566,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 285,
+          "line_number": 284,
           "function_name": "logistic_regression",
           "code": "text(\"$$weight = 0.6, \\\\quad bias = -3$$\")"
         }
@@ -3592,7 +3594,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 287,
+          "line_number": 286,
           "function_name": "logistic_regression",
           "code": "text(\"We want to predict the pass probability for a student who studied **6 hours.**\")"
         }
@@ -3620,7 +3622,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 289,
+          "line_number": 288,
           "function_name": "logistic_regression",
           "code": "text(\"### Step 1: Compute z (the linear part)\")"
         }
@@ -3648,7 +3650,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 290,
+          "line_number": 289,
           "function_name": "logistic_regression",
           "code": "text(\"First we combine the input with the model's parameters:\")"
         }
@@ -3676,7 +3678,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 291,
+          "line_number": 290,
           "function_name": "logistic_regression",
           "code": "text(\"$$z = w \\\\cdot x + b$$\")"
         }
@@ -3704,7 +3706,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 292,
+          "line_number": 291,
           "function_name": "logistic_regression",
           "code": "text(\"For our example:\")"
         }
@@ -3732,7 +3734,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 293,
+          "line_number": 292,
           "function_name": "logistic_regression",
           "code": "text(\"$$z = 0.6 \\\\times 6 + (-3) = 0.6$$\")"
         }
@@ -3760,7 +3762,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 294,
+          "line_number": 293,
           "function_name": "logistic_regression",
           "code": "text(\"So **z = 0.6**\")"
         }
@@ -3788,7 +3790,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 296,
+          "line_number": 295,
           "function_name": "logistic_regression",
           "code": "text(\"### Step 2: Plug z into the sigmoid\")"
         }
@@ -3816,7 +3818,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 297,
+          "line_number": 296,
           "function_name": "logistic_regression",
           "code": "text(\"$$p = \\\\sigma(z) = \\\\frac{1}{1 + e^{-0.6}} \\\\approx 0.645$$\")"
         }
@@ -3844,7 +3846,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 299,
+          "line_number": 298,
           "function_name": "logistic_regression",
           "code": "text(\"### Step 3: Interpret the result\")"
         }
@@ -3872,7 +3874,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 300,
+          "line_number": 299,
           "function_name": "logistic_regression",
           "code": "text(\"The model predicts a **64.5% chance** of passing the exam.\")"
         }
@@ -3928,7 +3930,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 316,
+          "line_number": 315,
           "function_name": "perceptron",
           "code": "def perceptron():"
         }
@@ -3948,7 +3950,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 317,
+          "line_number": 316,
           "function_name": "perceptron",
           "code": "text(\"## 3. The Perceptron\")"
         }
@@ -3976,7 +3978,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 318,
+          "line_number": 317,
           "function_name": "perceptron",
           "code": "link(rosenblatt_1958)"
         }
@@ -4014,7 +4016,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 320,
+          "line_number": 319,
           "function_name": "perceptron",
           "code": "text(\"### Definition\")"
         }
@@ -4042,7 +4044,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 321,
+          "line_number": 320,
           "function_name": "perceptron",
           "code": "text(\"The Perceptron is the simplest type of artificial neural network and one of the earliest algorithms designed for **supervised binary classification** (sorting data into exactly two classes).\")"
         }
@@ -4070,7 +4072,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 322,
+          "line_number": 321,
           "function_name": "perceptron",
           "code": "text(\"It was introduced by Frank Rosenblatt in **1958**.\")"
         }
@@ -4098,7 +4100,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 323,
+          "line_number": 322,
           "function_name": "perceptron",
           "code": "text(\"*\\\"The Perceptron looks at a set of numbers describing something, multiplies each number by how important it is, adds them up, and decides which of two classes the thing belongs to.\\\"*\")"
         }
@@ -4126,7 +4128,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 324,
+          "line_number": 323,
           "function_name": "perceptron",
           "code": "image(\"images/perceptron.png\", width=600)"
         }
@@ -4156,7 +4158,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 325,
+          "line_number": 324,
           "function_name": "perceptron",
           "code": "text(\"### The Perceptron Formula\")"
         }
@@ -4184,7 +4186,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 326,
+          "line_number": 325,
           "function_name": "perceptron",
           "code": "text(\"The entire decision-making process can be written as a single mathematical formula:\")"
         }
@@ -4212,7 +4214,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 327,
+          "line_number": 326,
           "function_name": "perceptron",
           "code": "text(\"$$y = f(w_1 x_1 + w_2 x_2 + \\\\cdots + w_n x_n + b)$$\")"
         }
@@ -4240,7 +4242,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 328,
+          "line_number": 327,
           "function_name": "perceptron",
           "code": "text(\"This is often written more compactly using summation notation:\")"
         }
@@ -4268,7 +4270,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 329,
+          "line_number": 328,
           "function_name": "perceptron",
           "code": "text(\"$$y = f\\\\!\\\\left(\\\\sum_{i=1}^{n} w_i x_i + b\\\\right)$$\")"
         }
@@ -4296,7 +4298,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 331,
+          "line_number": 330,
           "function_name": "perceptron",
           "code": "text(\"### Breakdown of the Formula\")"
         }
@@ -4324,7 +4326,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 332,
+          "line_number": 331,
           "function_name": "perceptron",
           "code": "text(\"| Symbol | Name |\\n|---|---|\\n| $x_1, x_2, \\\\ldots, x_n$ | Inputs / Features |\\n| $w_1, w_2, \\\\ldots, w_n$ | Weights |\\n| $b$ | Bias |\\n| $\\\\sum (w_i \\\\cdot x_i)$ | Weighted Sum / Net Input |\\n| $f(\\\\,)$ | Activation Function |\\n| $y$ | Output |\")"
         }
@@ -4352,7 +4354,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 334,
+          "line_number": 333,
           "function_name": "perceptron",
           "code": "text(\"### The Step (Activation) Function\")"
         }
@@ -4380,7 +4382,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 335,
+          "line_number": 334,
           "function_name": "perceptron",
           "code": "text(\"The classic Perceptron activation function is the **step function**:\")"
         }
@@ -4408,7 +4410,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 336,
+          "line_number": 335,
           "function_name": "perceptron",
           "code": "text(\"$$f(z) = \\\\begin{cases} 1 & \\\\text{if } z \\\\geq 0 \\\\\\\\ 0 & \\\\text{if } z < 0 \\\\end{cases}$$\")"
         }
@@ -4436,7 +4438,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 338,
+          "line_number": 337,
           "function_name": "perceptron",
           "code": "text(\"### How the Perceptron Separates the Classes\")"
         }
@@ -4464,7 +4466,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 339,
+          "line_number": 338,
           "function_name": "perceptron",
           "code": "text(\"**The Decision Boundary:** The equation $\\\\sum w_i x_i + b = 0$ is literally the equation of a **line** (2 features) or a **flat plane** (more features). This line is called the **decision boundary**.\")"
         }
@@ -4492,7 +4494,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 340,
+          "line_number": 339,
           "function_name": "perceptron",
           "code": "text(\"**Separating the Class Fields:** Before computing, identify which columns are *features* (inputs) and which is the *target* (the class label you check against).\")"
         }
@@ -4520,7 +4522,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 342,
+          "line_number": 341,
           "function_name": "perceptron",
           "code": "text(\"### Example 1: AND Logic Gate\")"
         }
@@ -4548,7 +4550,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 343,
+          "line_number": 342,
           "function_name": "perceptron",
           "code": "text(\"Given weights (already trained): $w_1 = 1$, $w_2 = 1$, bias $b = -1.5$\")"
         }
@@ -4576,7 +4578,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 344,
+          "line_number": 343,
           "function_name": "perceptron",
           "code": "and_data: list[tuple[int, int, int]] = ["
         }
@@ -4596,7 +4598,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 350,
+          "line_number": 349,
           "function_name": "perceptron",
           "code": "image(\"images/perceptron_example1_1.png\", width=600)"
         }
@@ -4626,7 +4628,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 351,
+          "line_number": 350,
           "function_name": "perceptron",
           "code": "text(\"**Step 1:** Write the formula for this problem:\")"
         }
@@ -4654,7 +4656,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 352,
+          "line_number": 351,
           "function_name": "perceptron",
           "code": "text(\"$$z = (w_1 \\\\cdot x_1) + (w_2 \\\\cdot x_2) + b$$\")"
         }
@@ -4682,7 +4684,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 353,
+          "line_number": 352,
           "function_name": "perceptron",
           "code": "w1_and = 1.0   # @inspect w1_and"
         }
@@ -4704,7 +4706,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 354,
+          "line_number": 353,
           "function_name": "perceptron",
           "code": "w2_and = 1.0   # @inspect w2_and"
         }
@@ -4726,7 +4728,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 355,
+          "line_number": 354,
           "function_name": "perceptron",
           "code": "b_and  = -1.5  # @inspect b_and"
         }
@@ -4748,7 +4750,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 356,
+          "line_number": 355,
           "function_name": "perceptron",
           "code": "text(\"$$z = (1)(x_1) + (1)(x_2) + (-1.5)$$\")"
         }
@@ -4776,7 +4778,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 358,
+          "line_number": 357,
           "function_name": "perceptron",
           "code": "text(\"**Step 2:** Substitute each row's feature values and apply the step function.\")"
         }
@@ -4804,7 +4806,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 359,
+          "line_number": 358,
           "function_name": "perceptron",
           "code": "image(\"images/perceptron_example1_2.png\", width=600)"
         }
@@ -4834,7 +4836,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 361,
+          "line_number": 360,
           "function_name": "perceptron",
           "code": "text(\"**Step 3:** Separate the classes.\")"
         }
@@ -4862,7 +4864,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 362,
+          "line_number": 361,
           "function_name": "perceptron",
           "code": "text(\"The decision boundary is $x_1 + x_2 - 1.5 = 0$, or rewritten as $x_2 = 1.5 - x_1$.\")"
         }
@@ -4890,7 +4892,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 363,
+          "line_number": 362,
           "function_name": "perceptron",
           "code": "text(\"Only the point $(1, 1)$ lands above this line, correctly isolating the single Class 1 point from the three Class 0 points.\")"
         }
@@ -4918,7 +4920,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 365,
+          "line_number": 364,
           "function_name": "perceptron",
           "code": "image(\"images/perceptron_example1_3.png\", width=600)"
         }
@@ -4948,7 +4950,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 366,
+          "line_number": 365,
           "function_name": "perceptron",
           "code": "text(\"### Example 2: Training the Perceptron\")"
         }
@@ -4976,7 +4978,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 367,
+          "line_number": 366,
           "function_name": "perceptron",
           "code": "link(novikoff_1962)"
         }
@@ -5014,7 +5016,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 368,
+          "line_number": 367,
           "function_name": "perceptron",
           "code": "text(\"The perceptron is **guaranteed to converge** when data is linearly separable.\")"
         }
@@ -5042,7 +5044,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 369,
+          "line_number": 368,
           "function_name": "perceptron",
           "code": "text(\"Starting point: $w_1 = 0$, $w_2 = 0$, $b = 0$, learning rate $\\\\eta = 1$\")"
         }
@@ -5070,7 +5072,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 370,
+          "line_number": 369,
           "function_name": "perceptron",
           "code": "text(\"$$z = (w_1 \\\\cdot x_1) + (w_2 \\\\cdot x_2) + b$$\")"
         }
@@ -5098,7 +5100,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 371,
+          "line_number": 370,
           "function_name": "perceptron",
           "code": "text(\"**Learning rule:**\")"
         }
@@ -5126,7 +5128,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 372,
+          "line_number": 371,
           "function_name": "perceptron",
           "code": "text(\"$$w_{i,\\\\text{new}} = w_{i,\\\\text{old}} + \\\\eta(t - y) \\\\cdot x_i$$\")"
         }
@@ -5154,7 +5156,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 373,
+          "line_number": 372,
           "function_name": "perceptron",
           "code": "text(\"$$b_{\\\\text{new}} = b_{\\\\text{old}} + \\\\eta(t - y)$$\")"
         }
@@ -5182,7 +5184,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 374,
+          "line_number": 373,
           "function_name": "perceptron",
           "code": "image(\"images/perceptron_example2.png\", width=600)"
         }
@@ -5212,7 +5214,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 376,
+          "line_number": 375,
           "function_name": "perceptron",
           "code": "text(\"### Live Demo \u2014 Perceptron Training\")"
         }
@@ -5240,7 +5242,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 377,
+          "line_number": 376,
           "function_name": "perceptron",
           "code": "code_cell(\"\"\""
         }
@@ -5268,7 +5270,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 430,
+          "line_number": 429,
           "function_name": "perceptron",
           "code": "text(\"### The XOR Problem: Perceptron's Hard Limit\")"
         }
@@ -5296,7 +5298,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 431,
+          "line_number": 430,
           "function_name": "perceptron",
           "code": "link(minsky_papert_1969)"
         }
@@ -5335,7 +5337,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 432,
+          "line_number": 431,
           "function_name": "perceptron",
           "code": "text(\"The perceptron only works when data is **linearly separable**.\")"
         }
@@ -5363,7 +5365,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 433,
+          "line_number": 432,
           "function_name": "perceptron",
           "code": "text(\"XOR cannot be solved by any single straight line:\")"
         }
@@ -5391,7 +5393,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 435,
+          "line_number": 434,
           "function_name": "perceptron",
           "code": "([0.0, 0.0], 0),"
         }
@@ -5411,7 +5413,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 436,
+          "line_number": 435,
           "function_name": "perceptron",
           "code": "([1.0, 1.0], 0),"
         }
@@ -5431,7 +5433,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 437,
+          "line_number": 436,
           "function_name": "perceptron",
           "code": "([0.0, 1.0], 1),"
         }
@@ -5451,7 +5453,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 438,
+          "line_number": 437,
           "function_name": "perceptron",
           "code": "([1.0, 0.0], 1),"
         }
@@ -5471,7 +5473,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 434,
+          "line_number": 433,
           "function_name": "perceptron",
           "code": "xor_data: list[tuple[list[float], int]] = ["
         }
@@ -5491,7 +5493,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 440,
+          "line_number": 439,
           "function_name": "perceptron",
           "code": "text(\"No hyperplane can separate these four points \u2014 this limitation motivated multi-layer networks.\")"
         }
@@ -5547,7 +5549,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 450,
+          "line_number": 449,
           "function_name": "linear_svm",
           "code": "def linear_svm():"
         }
@@ -5567,7 +5569,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 451,
+          "line_number": 450,
           "function_name": "linear_svm",
           "code": "text(\"## 4. Linear Support Vector Machine (Linear SVM)\")"
         }
@@ -5595,7 +5597,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 452,
+          "line_number": 451,
           "function_name": "linear_svm",
           "code": "link(cortes_vapnik_1995)"
         }
@@ -5634,7 +5636,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 454,
+          "line_number": 453,
           "function_name": "linear_svm",
           "code": "text(\"### Definition\")"
         }
@@ -5662,7 +5664,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 455,
+          "line_number": 454,
           "function_name": "linear_svm",
           "code": "text(\"A Linear Support Vector Machine is a supervised machine learning algorithm used for **binary classification**.\")"
         }
@@ -5690,7 +5692,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 456,
+          "line_number": 455,
           "function_name": "linear_svm",
           "code": "text(\"It finds the optimal separating **hyperplane** (a straight line in 2D, a flat plane in 3D) that divides two classes while **maximizing the margin** \u2014 the empty buffer zone between the boundary and the nearest data points of each class.\")"
         }
@@ -5718,7 +5720,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 457,
+          "line_number": 456,
           "function_name": "linear_svm",
           "code": "text(\"*Linear SVM draws the single straight line that is as far away as possible from the nearest points of both classes, and those nearest points are the **support vectors** that pin the line in place.*\")"
         }
@@ -5746,7 +5748,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 458,
+          "line_number": 457,
           "function_name": "linear_svm",
           "code": "image(\"images/lsvm.png\", width=600)"
         }
@@ -5776,7 +5778,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 459,
+          "line_number": 458,
           "function_name": "linear_svm",
           "code": "text(\"### The Linear SVM Formula\")"
         }
@@ -5804,7 +5806,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 460,
+          "line_number": 459,
           "function_name": "linear_svm",
           "code": "text(\"Just like the Perceptron, Linear SVM uses a weighted sum plus bias \u2014 the **decision function**:\")"
         }
@@ -5832,7 +5834,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 461,
+          "line_number": 460,
           "function_name": "linear_svm",
           "code": "text(\"$$f(x) = w \\\\cdot x + b = w_1 x_1 + w_2 x_2 + \\\\cdots + w_n x_n + b$$\")"
         }
@@ -5860,7 +5862,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 462,
+          "line_number": 461,
           "function_name": "linear_svm",
           "code": "text(\"The predicted class uses the **sign function** instead of a step function:\")"
         }
@@ -5888,7 +5890,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 463,
+          "line_number": 462,
           "function_name": "linear_svm",
           "code": "text(\"$$y = \\\\text{sign}(w \\\\cdot x + b) = \\\\begin{cases} +1 & \\\\text{if } w \\\\cdot x + b \\\\geq 0 \\\\\\\\ -1 & \\\\text{if } w \\\\cdot x + b < 0 \\\\end{cases}$$\")"
         }
@@ -5916,7 +5918,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 465,
+          "line_number": 464,
           "function_name": "linear_svm",
           "code": "text(\"### Breakdown of the Formula\")"
         }
@@ -5944,7 +5946,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 466,
+          "line_number": 465,
           "function_name": "linear_svm",
           "code": "text(\"| Symbol | Name |\\n|---|---|\\n| $x = (x_1, \\\\ldots, x_n)$ | Feature vector |\\n| $w = (w_1, \\\\ldots, w_n)$ | Weight vector |\\n| $b$ | Bias / Intercept |\\n| $w \\\\cdot x + b$ | Decision function |\\n| $\\\\text{sign}(\\\\,)$ | Sign function |\\n| $y_i$ | True class label |\\n| $\\\\|w\\\\|$ | Norm (magnitude) of $w$ |\\n| Support vectors | \u2014 |\")"
         }
@@ -5972,7 +5974,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 468,
+          "line_number": 467,
           "function_name": "linear_svm",
           "code": "text(\"### The Margin\")"
         }
@@ -6000,7 +6002,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 469,
+          "line_number": 468,
           "function_name": "linear_svm",
           "code": "text(\"SVM does not just draw one line \u2014 it conceptually draws **three parallel lines**: the decision boundary in the middle, and two margin boundaries on either side touching the nearest points of each class:\")"
         }
@@ -6028,7 +6030,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 470,
+          "line_number": 469,
           "function_name": "linear_svm",
           "code": "text(\"- **Positive margin boundary:** $w \\\\cdot x + b = +1$\")"
         }
@@ -6056,7 +6058,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 471,
+          "line_number": 470,
           "function_name": "linear_svm",
           "code": "text(\"- **Negative margin boundary:** $w \\\\cdot x + b = -1$\")"
         }
@@ -6084,7 +6086,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 472,
+          "line_number": 471,
           "function_name": "linear_svm",
           "code": "text(\"The distance between these two margin boundaries is the **margin**, calculated directly from the length of $w$:\")"
         }
@@ -6112,7 +6114,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 473,
+          "line_number": 472,
           "function_name": "linear_svm",
           "code": "text(\"$$\\\\text{Margin width} = \\\\frac{2}{\\\\|w\\\\|}$$\")"
         }
@@ -6140,7 +6142,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 475,
+          "line_number": 474,
           "function_name": "linear_svm",
           "code": "text(\"### How Linear SVM Separates the Classes\")"
         }
@@ -6168,7 +6170,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 476,
+          "line_number": 475,
           "function_name": "linear_svm",
           "code": "text(\"**The Decision Boundary and the Margin 'Street':** The equation $w \\\\cdot x + b = 0$ is the decision boundary, exactly as in the Perceptron. But SVM adds two more parallel lines ($w \\\\cdot x + b = 1$ and $w \\\\cdot x + b = -1$) that mark the edges of the widest possible empty street between the classes.\")"
         }
@@ -6196,7 +6198,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 477,
+          "line_number": 476,
           "function_name": "linear_svm",
           "code": "text(\"**Support Vectors \u2014 The Points That Actually Matter:** Once trained, most points are irrelevant to the final boundary. Only the points where $y_i(w \\\\cdot x_i + b) = 1$ \u2014 sitting exactly on the margin boundaries \u2014 are the **support vectors**.\")"
         }
@@ -6224,7 +6226,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 478,
+          "line_number": 477,
           "function_name": "linear_svm",
           "code": "text(\"**Separating the Class Fields:** Identify which columns are *features* ($x_1, x_2, \\\\ldots$) and which is the *target label* $y \\\\in \\\\{-1, +1\\\\}$.\")"
         }
@@ -6252,7 +6254,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 480,
+          "line_number": 479,
           "function_name": "linear_svm",
           "code": "text(\"### Example 1: Classifying Points with a Trained Linear SVM\")"
         }
@@ -6280,7 +6282,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 481,
+          "line_number": 480,
           "function_name": "linear_svm",
           "code": "text(\"Given trained weights: $w = (1,\\\\, 1)$, bias $b = -5$\")"
         }
@@ -6308,7 +6310,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 482,
+          "line_number": 481,
           "function_name": "linear_svm",
           "code": "svm_points: list[tuple[str, float, float, int]] = ["
         }
@@ -6328,7 +6330,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 489,
+          "line_number": 488,
           "function_name": "linear_svm",
           "code": "text(\"**Step 1:** Write the decision function for this problem:\")"
         }
@@ -6356,7 +6358,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 490,
+          "line_number": 489,
           "function_name": "linear_svm",
           "code": "text(\"$$f(x) = (1)(x_1) + (1)(x_2) + (-5) = x_1 + x_2 - 5$$\")"
         }
@@ -6384,7 +6386,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 491,
+          "line_number": 490,
           "function_name": "linear_svm",
           "code": "w1_svm = 1.0   # @inspect w1_svm"
         }
@@ -6406,7 +6408,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 492,
+          "line_number": 491,
           "function_name": "linear_svm",
           "code": "w2_svm = 1.0   # @inspect w2_svm"
         }
@@ -6428,7 +6430,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 493,
+          "line_number": 492,
           "function_name": "linear_svm",
           "code": "b_svm  = -5.0  # @inspect b_svm"
         }
@@ -6450,7 +6452,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 494,
+          "line_number": 493,
           "function_name": "linear_svm",
           "code": "image(\"images/svm_1_1.png\", width=600)"
         }
@@ -6480,7 +6482,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 495,
+          "line_number": 494,
           "function_name": "linear_svm",
           "code": "text(\"**Step 2:** Substitute each point's feature values and apply the sign function.\")"
         }
@@ -6508,7 +6510,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 496,
+          "line_number": 495,
           "function_name": "linear_svm",
           "code": "f_p1 = w1_svm * svm_points[0][1] + w2_svm * svm_points[0][2] + b_svm  # @inspect f_p1"
         }
@@ -6530,7 +6532,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 497,
+          "line_number": 496,
           "function_name": "linear_svm",
           "code": "y_p1 = 1 if f_p1 >= 0 else -1  # @inspect y_p1"
         }
@@ -6552,7 +6554,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 498,
+          "line_number": 497,
           "function_name": "linear_svm",
           "code": "f_p2 = w1_svm * svm_points[1][1] + w2_svm * svm_points[1][2] + b_svm  # @inspect f_p2"
         }
@@ -6574,7 +6576,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 499,
+          "line_number": 498,
           "function_name": "linear_svm",
           "code": "y_p2 = 1 if f_p2 >= 0 else -1  # @inspect y_p2"
         }
@@ -6596,7 +6598,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 500,
+          "line_number": 499,
           "function_name": "linear_svm",
           "code": "f_p3 = w1_svm * svm_points[2][1] + w2_svm * svm_points[2][2] + b_svm  # @inspect f_p3"
         }
@@ -6618,7 +6620,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 501,
+          "line_number": 500,
           "function_name": "linear_svm",
           "code": "y_p3 = 1 if f_p3 >= 0 else -1  # @inspect y_p3"
         }
@@ -6640,7 +6642,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 502,
+          "line_number": 501,
           "function_name": "linear_svm",
           "code": "f_p4 = w1_svm * svm_points[3][1] + w2_svm * svm_points[3][2] + b_svm  # @inspect f_p4"
         }
@@ -6662,7 +6664,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 503,
+          "line_number": 502,
           "function_name": "linear_svm",
           "code": "y_p4 = 1 if f_p4 >= 0 else -1  # @inspect y_p4"
         }
@@ -6684,7 +6686,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 505,
+          "line_number": 504,
           "function_name": "linear_svm",
           "code": "image(\"images/svm_1_23.png\", width=600)"
         }
@@ -6714,7 +6716,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 506,
+          "line_number": 505,
           "function_name": "linear_svm",
           "code": "text(\"**Step 3:** Separate the classes.\")"
         }
@@ -6742,7 +6744,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 507,
+          "line_number": 506,
           "function_name": "linear_svm",
           "code": "text(\"The decision boundary is $x_1 + x_2 - 5 = 0$, or rewritten as $x_2 = 5 - x_1$.\")"
         }
@@ -6770,7 +6772,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 508,
+          "line_number": 507,
           "function_name": "linear_svm",
           "code": "text(\"The **sign** of $f(x)$ determines the label: $f(x) < 0 \\\\Rightarrow -1$, $f(x) > 0 \\\\Rightarrow +1$.\")"
         }
@@ -6798,7 +6800,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 510,
+          "line_number": 509,
           "function_name": "linear_svm",
           "code": "text(\"### Example 2: Identifying the Support Vectors\")"
         }
@@ -6826,7 +6828,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 511,
+          "line_number": 510,
           "function_name": "linear_svm",
           "code": "text(\"**Step 1:** For every point compute the **functional margin** $y_i \\\\times f(x_i)$.\")"
         }
@@ -6854,7 +6856,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 512,
+          "line_number": 511,
           "function_name": "linear_svm",
           "code": "text(\"A value of exactly **1** means the point sits precisely on its margin boundary.\")"
         }
@@ -6882,7 +6884,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 513,
+          "line_number": 512,
           "function_name": "linear_svm",
           "code": "fm_p1 = svm_points[0][3] * f_p1  # @inspect fm_p1"
         }
@@ -6904,7 +6906,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 514,
+          "line_number": 513,
           "function_name": "linear_svm",
           "code": "fm_p2 = svm_points[1][3] * f_p2  # @inspect fm_p2"
         }
@@ -6926,7 +6928,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 515,
+          "line_number": 514,
           "function_name": "linear_svm",
           "code": "fm_p3 = svm_points[2][3] * f_p3  # @inspect fm_p3"
         }
@@ -6948,7 +6950,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 516,
+          "line_number": 515,
           "function_name": "linear_svm",
           "code": "fm_p4 = svm_points[3][3] * f_p4  # @inspect fm_p4"
         }
@@ -6970,7 +6972,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 517,
+          "line_number": 516,
           "function_name": "linear_svm",
           "code": "image(\"images/svm_2_1.png\", width=600)"
         }
@@ -7000,7 +7002,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 518,
+          "line_number": 517,
           "function_name": "linear_svm",
           "code": "text(\"**Step 2:** Interpret \u2014 P2 ($y \\\\times f = 1$) and P3 ($y \\\\times f = 1$) are the **support vectors**. P1 and P4 are far inside the safe zone.\")"
         }
@@ -7028,7 +7030,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 520,
+          "line_number": 519,
           "function_name": "linear_svm",
           "code": "text(\"### Example 3: Computing the Margin Width\")"
         }
@@ -7056,7 +7058,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 521,
+          "line_number": 520,
           "function_name": "linear_svm",
           "code": "text(\"**Step 1:** Compute the norm of the weight vector:\")"
         }
@@ -7084,7 +7086,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 522,
+          "line_number": 521,
           "function_name": "linear_svm",
           "code": "text(\"$$\\\\|w\\\\| = \\\\sqrt{w_1^2 + w_2^2} = \\\\sqrt{1^2 + 1^2} = \\\\sqrt{2} \\\\approx 1.414$$\")"
         }
@@ -7112,7 +7114,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 523,
+          "line_number": 522,
           "function_name": "linear_svm",
           "code": "norm_w = math.sqrt(w1_svm**2 + w2_svm**2)  # @inspect norm_w"
         }
@@ -7134,7 +7136,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 524,
+          "line_number": 523,
           "function_name": "linear_svm",
           "code": "image(\"images/svm_3_1.png\", width=600)"
         }
@@ -7164,7 +7166,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 526,
+          "line_number": 525,
           "function_name": "linear_svm",
           "code": "text(\"**Step 2:** Apply the margin formula:\")"
         }
@@ -7192,7 +7194,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 527,
+          "line_number": 526,
           "function_name": "linear_svm",
           "code": "text(\"$$\\\\text{Margin width} = \\\\frac{2}{\\\\|w\\\\|} = \\\\frac{2}{\\\\sqrt{2}} \\\\approx 1.414$$\")"
         }
@@ -7220,7 +7222,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 528,
+          "line_number": 527,
           "function_name": "linear_svm",
           "code": "margin_width = 2.0 / norm_w  # @inspect margin_width"
         }
@@ -7242,7 +7244,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 530,
+          "line_number": 529,
           "function_name": "linear_svm",
           "code": "text(\"**Step 3:** Write the two margin boundary equations using $b = -5$:\")"
         }
@@ -7270,7 +7272,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 531,
+          "line_number": 530,
           "function_name": "linear_svm",
           "code": "text(\"- **Positive margin boundary:** $x_1 + x_2 - 5 = +1 \\\\Rightarrow x_1 + x_2 = 6$\")"
         }
@@ -7298,7 +7300,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 532,
+          "line_number": 531,
           "function_name": "linear_svm",
           "code": "text(\"- **Negative margin boundary:** $x_1 + x_2 - 5 = -1 \\\\Rightarrow x_1 + x_2 = 4$\")"
         }
@@ -7326,7 +7328,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 533,
+          "line_number": 532,
           "function_name": "linear_svm",
           "code": "text(\"**Step 4:** Interpret \u2014 P2 lies on $x_1 + x_2 = 4$ and P3 lies on $x_1 + x_2 = 6$. Moving any other point leaves the boundary unchanged; moving a support vector shifts it.\")"
         }
@@ -7354,7 +7356,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 534,
+          "line_number": 533,
           "function_name": "linear_svm",
           "code": "text(\"### Live Demo \u2014 Linear SVM\")"
         }
@@ -7382,7 +7384,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 535,
+          "line_number": 534,
           "function_name": "linear_svm",
           "code": "code_cell(\"\"\""
         }
@@ -7438,7 +7440,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 618,
+          "line_number": 617,
           "function_name": "evaluation_metrics",
           "code": "def evaluation_metrics():"
         }
@@ -7458,7 +7460,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 619,
+          "line_number": 618,
           "function_name": "evaluation_metrics",
           "code": "text(\"## Evaluation Metrics\")"
         }
@@ -7486,7 +7488,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 620,
+          "line_number": 619,
           "function_name": "evaluation_metrics",
           "code": "text(\"**Accuracy alone can mislead.** If 99% of emails are safe, always predicting 'safe' gives 99% accuracy \u2014 but catches zero spam.\")"
         }
@@ -7514,7 +7516,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 622,
+          "line_number": 621,
           "function_name": "evaluation_metrics",
           "code": "text(\"### Confusion Matrix\")"
         }
@@ -7542,7 +7544,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 623,
+          "line_number": 622,
           "function_name": "evaluation_metrics",
           "code": "text(\"| | Predicted \u22121 (No) | Predicted +1 (Yes) |\\n|---|---|---|\\n| **Actual \u22121** | TN (True Negative) | FP (False Positive) |\\n| **Actual +1** | FN (False Negative) | TP (True Positive) |\")"
         }
@@ -7570,7 +7572,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 625,
+          "line_number": 624,
           "function_name": "evaluation_metrics",
           "code": "text(\"| # | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |\\n|---|---|---|---|---|---|---|---|---|---|---|\\n| **True** | 1 | 0 | 1 | 1 | 0 | 0 | 1 | 0 | 1 | 0 |\\n| **Pred** | 1 | 0 | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 0 |\")"
         }
@@ -7598,7 +7600,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 626,
+          "line_number": 625,
           "function_name": "evaluation_metrics",
           "code": "text(\"### Live Demo \u2014 Confusion Matrix & Metrics\")"
         }
@@ -7626,7 +7628,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 627,
+          "line_number": 626,
           "function_name": "evaluation_metrics",
           "code": "code_cell(\"\"\""
         }
@@ -7654,7 +7656,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 691,
+          "line_number": 690,
           "function_name": "evaluation_metrics",
           "code": "text(\"### Precision, Recall, F1\")"
         }
@@ -7682,7 +7684,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 692,
+          "line_number": 691,
           "function_name": "evaluation_metrics",
           "code": "text(\"**Precision**: of all predicted positives, how many were truly positive?\")"
         }
@@ -7710,7 +7712,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 693,
+          "line_number": 692,
           "function_name": "evaluation_metrics",
           "code": "text(\"$$\\\\text{Precision} = \\\\frac{TP}{TP + FP}$$\")"
         }
@@ -7738,7 +7740,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 694,
+          "line_number": 693,
           "function_name": "evaluation_metrics",
           "code": "text(\"**Recall**: of all true positives, how many did we catch?\")"
         }
@@ -7766,7 +7768,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 695,
+          "line_number": 694,
           "function_name": "evaluation_metrics",
           "code": "text(\"$$\\\\text{Recall} = \\\\frac{TP}{TP + FN}$$\")"
         }
@@ -7794,7 +7796,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 696,
+          "line_number": 695,
           "function_name": "evaluation_metrics",
           "code": "text(\"**F1**: harmonic mean of precision and recall.\")"
         }
@@ -7822,7 +7824,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 697,
+          "line_number": 696,
           "function_name": "evaluation_metrics",
           "code": "text(\"$$F_1 = 2 \\\\cdot \\\\frac{\\\\text{Precision} \\\\times \\\\text{Recall}}{\\\\text{Precision} + \\\\text{Recall}}$$\")"
         }
@@ -7850,7 +7852,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 698,
+          "line_number": 697,
           "function_name": "evaluation_metrics",
           "code": "text(\"### When to use each metric\")"
         }
@@ -7878,7 +7880,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 699,
+          "line_number": 698,
           "function_name": "evaluation_metrics",
           "code": "text(\"- **Precision** matters when false positives are costly (spam filter \u2014 don't block real emails).\")"
         }
@@ -7906,7 +7908,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 700,
+          "line_number": 699,
           "function_name": "evaluation_metrics",
           "code": "text(\"- **Recall** matters when false negatives are costly (disease screening \u2014 don't miss sick patients).\")"
         }
@@ -7934,7 +7936,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 701,
+          "line_number": 700,
           "function_name": "evaluation_metrics",
           "code": "text(\"- **F1** balances both; useful with imbalanced class distributions.\")"
         }
@@ -7962,7 +7964,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 702,
+          "line_number": 701,
           "function_name": "evaluation_metrics",
           "code": "text(\"- **Accuracy** works when classes are balanced and all errors equally bad.\")"
         }
@@ -7990,7 +7992,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 706,
+          "line_number": 705,
           "function_name": "evaluation_metrics",
           "code": "text(\"### Algorithm Quick Reference \u2014 Covered in Depth\")"
         }
@@ -8018,7 +8020,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 707,
+          "line_number": 706,
           "function_name": "evaluation_metrics",
           "code": "text(\"| Algorithm | Analogy | Output | Best For |\\n|---|---|---|---|\\n| Perceptron | Strict Club Bouncer | Hard Binary | Simple binary tasks |\\n| Logistic Regression | Weather Forecaster | Probability | When confidence matters |\\n| Linear SVM | Highway Construction | Margin Distance | Maximizing safety and generalization |\\n| Fisher's LDA | Flashlights & Shadows | 1D Projection | Statistical group separation |\")"
         }
@@ -8046,7 +8048,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 709,
+          "line_number": 708,
           "function_name": "evaluation_metrics",
           "code": "text(\"### Other Linear Classifiers (Overview)\")"
         }
@@ -8074,7 +8076,7 @@
         },
         {
           "path": "lecture_linear_classification.py",
-          "line_number": 710,
+          "line_number": 709,
           "function_name": "evaluation_metrics",
           "code": "text(\"| Algorithm | Analogy | Key Idea |\\n|---|---|---|\\n| Ridge Classifier | Cautious Investor | L2 penalty keeps weights small and balanced |\\n| Passive-Aggressive | Driving Instructor | Silent when correct; aggressive correction on error |\\n| SGD Classifier | Blindfolded Hiker | Optimization framework \u2014 any loss, one sample at a time |\\n| Discriminant Functions | Video Game Scoring | One score formula per class; pick the highest |\")"
         }

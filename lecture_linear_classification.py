@@ -622,6 +622,7 @@ def evaluation_metrics():
     text("### Confusion Matrix")
     text("| | Predicted −1 (No) | Predicted +1 (Yes) |\n|---|---|---|\n| **Actual −1** | TN (True Negative) | FP (False Positive) |\n| **Actual +1** | FN (False Negative) | TP (True Positive) |")
     
+    text("| # | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |\n|---|---|---|---|---|---|---|---|---|---|---|\n| **True** | 1 | 0 | 1 | 1 | 0 | 0 | 1 | 0 | 1 | 0 |\n| **Pred** | 1 | 0 | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 0 |")
     text("### Live Demo — Confusion Matrix & Metrics")
     code_cell("""
 import numpy as np

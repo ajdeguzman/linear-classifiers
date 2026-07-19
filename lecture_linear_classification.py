@@ -27,6 +27,7 @@ def main():
 def welcome():
     text("## Linear Classification Techniques")
     text("**Presenters**: AJ Barcelona, A De Guzman, J Gambito")
+    text("University of the Cordilleras - Linear Techniques and Machine Learning")
 
 ############################################################
 
@@ -110,6 +111,14 @@ def lda():
     text("The goal is to project the data to a new space.")
     text("Then, once projected, they try to classify the data points by finding a linear separation.")
 
+    text("### The Mathematical Concept — Fisher's Criterion")
+    text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")
+    text("$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$")
+    text("- $S_B$: Between-Class Scatter (how far apart the group means are).")
+    text("- $S_W$: Within-Class Scatter (how spread out each group is internally).")
+    text("Optimal projection direction: $w = S_W^{-1}(m_1 - m_2)$.")
+    image("images/separation.png", width=600)
+
     text("Suppose we want to classify the red and blue circles correctly. It is clear that with a simple linear model we will not get a good result.")
     image("images/linearly-inseperable-data.png", width=300)
     text("What if we could transform the data so that we could draw a line that separates the 2 classes?")
@@ -118,51 +127,121 @@ def lda():
     text("### What is dimensionality and what is dimensionality reduction?")
     image("images/dimensionality_reduction.webp", width=600)
     image("images/dimensionality_reduction_2.webp", width=600)
+
     text("### Geometric Intuition")
     text("Example: Houses on the market with price, age, size, distance to public transport and number of rooms")
     iframe("lda-explorable/index.html", height=2000)
-    text("### The Mathematical Concept — Fisher's Criterion")
-    text("Maximize the ratio of **between-class scatter** to **within-class scatter**:")
+
+    text("### Scenario")
+    text("Suppose you're a real-estate analyst and you want to predict whether a listed house will be a fast seller (sold within a month) or a slow seller (sat on the market for several months).")
     text("$$J(w) = \\frac{w^T S_B w}{w^T S_W w}$$")
-    text("- $S_B$: Between-Class Scatter (how far apart the group means are).")
-    text("- $S_W$: Within-Class Scatter (how spread out each group is internally).")
-    text("Optimal projection direction: $w = S_W^{-1}(m_1 - m_2)$.")
+    text("\nYou describe each house with two features:")
+    text("- $x_1$ = floor area ($m^2$)")
+    text("- $x_2$ = distance to the city center (km)")
+    
+    text("3 houses per class")
+    image("images/lda_table1.png", width=600)
+
+    text("### Step 1: Class Means")
+    text("The mean vector of a class is just the average of each feature over that class's houses.")
+
+    image("images/lda_eq1.png", width=600)
+    text("The mean difference is the vector pointing from one class center to the other:")
+    image("images/lda_eq2.png", width=200)
+    
+    text("### Step 2: Within-class scatter matrices")
+    image("images/lda_step2.png", width=600)
+
+    text("### Step 3:  The between-class scatter (what we're maximizing)")
+    text("The between-class scatter captures how far apart the class centers are:")
+    image("images/lda_step3.png", width=600)
+
+    text("### Step 4:  Solve for the optimal direction")
+    image("images/lda_step4.png", width=600)
 
     text("### Live Demo — LDA Projection")
     code_cell("""
 import numpy as np
 import matplotlib.pyplot as plt
 
-np.random.seed(42)
-X0 = np.random.randn(30, 2) + [2, 2]   # Class 0
-X1 = np.random.randn(30, 2) + [6, 5]   # Class 1
-X = np.vstack([X0, X1])
+# ---------------------------------------------------------------------------
+# 1. Data  (each row = one house: [floor_area_m2, distance_km])
+# ---------------------------------------------------------------------------
+fast = np.array([[120, 3],
+                 [100, 5],
+                 [140, 4]], dtype=float)   # Class 1: sold within a month
 
-# Compute LDA direction: w = Sw^{-1} (m1 - m0)
-m0, m1 = X0.mean(axis=0), X1.mean(axis=0)
-Sw = (X0 - m0).T @ (X0 - m0) + (X1 - m1).T @ (X1 - m1)
-w = np.linalg.inv(Sw) @ (m1 - m0)
-w = w / np.linalg.norm(w)
+slow = np.array([[ 80,  9],
+                 [ 60, 11],
+                 [100, 10]], dtype=float)  # Class 2: took several months
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+# ---------------------------------------------------------------------------
+# 2. Class means  ->  m = (1/N) * sum(x)
+# ---------------------------------------------------------------------------
+m1 = fast.mean(axis=0)          # mean of class 1
+m2 = slow.mean(axis=0)          # mean of class 2
+print("m1 (fast) =", m1)        # [120.  4.]
+print("m2 (slow) =", m2)        # [ 80. 10.]
 
-# Left: 2D scatter + LDA axis
-ax1.scatter(*X0.T, color='steelblue', label='Class 0', alpha=0.7)
-ax1.scatter(*X1.T, color='tomato',    label='Class 1', alpha=0.7)
-cx, cy = X.mean(axis=0)
-t = np.linspace(-5, 5, 100)
-ax1.plot(cx + t*w[0], cy + t*w[1], 'k--', lw=1.5, label='LDA axis')
-ax1.set_title('Original 2D Data + LDA Direction')
-ax1.legend(); ax1.set_aspect('equal')
+# ---------------------------------------------------------------------------
+# 3. Within-class scatter  ->  S_i = sum (x - m)(x - m)^T ,   S_W = S1 + S2
+# ---------------------------------------------------------------------------
+def scatter(X, m):
+    d = X - m                    # deviations from the class mean
+    return d.T @ d               # sums the outer products for us
 
-# Right: 1D projected distributions
-proj0, proj1 = X0 @ w, X1 @ w
-ax2.hist(proj0, bins=12, alpha=0.6, color='steelblue', label='Class 0')
-ax2.hist(proj1, bins=12, alpha=0.6, color='tomato',    label='Class 1')
-boundary = (proj0.mean() + proj1.mean()) / 2
-ax2.axvline(boundary, color='black', linestyle='--', label=f'Boundary ≈ {boundary:.2f}')
-ax2.set_title('1D Projected Distributions')
-ax2.legend()
+S1 = scatter(fast, m1)
+S2 = scatter(slow, m2)
+S_W = S1 + S2
+print("S_W ="); print(S_W)       # [[1600. -40.] [-40.   4.]]
+
+# ---------------------------------------------------------------------------
+# 4. Fisher direction  ->  w = S_W^{-1} (m1 - m2)
+# ---------------------------------------------------------------------------
+w = np.linalg.solve(S_W, m1 - m2)   # solve is more stable than inv()
+w = w / w[0]                        # rescale so w[0] = 1  ->  ~[1, 100]
+print("w =", w)                     # [  1. 100.]
+
+# ---------------------------------------------------------------------------
+# 5. Threshold  ->  midpoint of the projected means
+# ---------------------------------------------------------------------------
+c = w @ (m1 + m2) / 2
+print("threshold c =", c)           # 800.0
+
+def classify(x):
+    y = w @ np.asarray(x, dtype=float)
+    return "fast" if y < c else "slow"
+
+print("90 m2, 8 km  ->", classify([90, 8]))    # slow
+print("130 m2, 4 km ->", classify([130, 4]))   # fast
+
+# ---------------------------------------------------------------------------
+# 6. Plot
+# ---------------------------------------------------------------------------
+fig, ax = plt.subplots(figsize=(7, 5))
+
+ax.scatter(fast[:, 0], fast[:, 1], c="#1baf7a", s=90, label="Fast sellers")
+ax.scatter(slow[:, 0], slow[:, 1], c="#eb6834", s=90, label="Slow sellers")
+
+# class means as diamonds
+ax.scatter(*m1, c="#199e70", marker="D", s=160, edgecolors="white",
+           linewidths=1.5, label="Fast mean")
+ax.scatter(*m2, c="#d95926", marker="D", s=160, edgecolors="white",
+           linewidths=1.5, label="Slow mean")
+
+# decision boundary:  w0*x1 + w1*x2 = c  ->  x2 = (c - w0*x1) / w1
+x1_line = np.linspace(50, 150, 200)
+x2_line = (c - w[0] * x1_line) / w[1]
+ax.plot(x1_line, x2_line, "--", c="#888780", lw=2,
+        label="Decision boundary")
+
+ax.set_xlabel("Floor area (m$^2$)")
+ax.set_ylabel("Distance to center (km)")
+ax.set_title("Fisher's Linear Discriminant")
+ax.set_xlim(50, 150)
+ax.set_ylim(2, 12)
+ax.legend(loc="upper right", frameon=False)
+ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()

@@ -3,6 +3,7 @@ import './App.css'
 import TraceViewer from './TraceViewer';
 
 const DEFAULT = '?animate=1&mode=audience&session=myclass&trace=var/traces/lecture_linear_classification.json';
+const PRESENTER = '/?trace=var%2Ftraces%2Flecture_linear_classification.json&step=0&animate=1&mode=presenter&session=myclass&key=mypin';
 const AUDIENCE_KEYS = ['mode', 'animate', 'session', 'trace'];
 const SESSION_KEY = 'audienceParams';
 
@@ -57,6 +58,7 @@ function App() {
     <BrowserRouter basename={process.env.NODE_ENV === 'production' ? '/linear-classifiers/' : '/'}>
       <Routes>
         <Route path="/" element={<Root />} />
+        <Route path="/present" element={<Navigate to={PRESENTER} replace />} />
       </Routes>
     </BrowserRouter>
   );

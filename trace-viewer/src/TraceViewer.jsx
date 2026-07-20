@@ -31,6 +31,14 @@ function TraceViewer() {
   // stepToSync is safe to reference in hooks (computed before any early returns)
   const stepToSync = targetStepIndex ?? 0;
 
+  // Capture the audience params once on mount so we can restore them if tampered with
+  const audienceParamsRef = useRef(isAudience ? {
+    mode: 'audience',
+    animate: urlParams.get('animate') || '1',
+    session: urlParams.get('session') || 'default',
+    trace: urlParams.get('trace') || '',
+  } : null);
+
   const [error, setError] = useState(null);
   const [trace, setTrace] = useState(null);
 
@@ -114,6 +122,23 @@ function TraceViewer() {
       .then(() => console.log('[Presenter] write OK'))
       .catch(e => console.error('[Presenter] write FAILED', e));
   }, [isPresenter, sessionId, stepToSync]);
+
+  // Audience: revert any manually removed/changed params
+  useEffect(() => {
+    if (!audienceParamsRef.current) return;
+    const required = audienceParamsRef.current;
+    const current = new URLSearchParams(location.search);
+    let needsUpdate = false;
+    for (const [key, value] of Object.entries(required)) {
+      if (current.get(key) !== value) {
+        current.set(key, value);
+        needsUpdate = true;
+      }
+    }
+    if (needsUpdate) {
+      navigate(`?${current.toString()}`, { replace: true });
+    }
+  }, [location.search, navigate]);
 
   // Audience: subscribe to Firebase and navigate to whatever step the presenter is on
   useEffect(() => {
@@ -593,7 +618,7 @@ function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, t
       border: `1px solid ${isPresenter ? '#c3e6cb' : '#b8daff'}`,
       fontFamily: 'sans-serif',
     }}>
-      {isPresenter ? `📡 Presenter` : `👁 Audience`}
+      {isPresenter ? `Presenter` : `Audience`}
     </span>
   );
 

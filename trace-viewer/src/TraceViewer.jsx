@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
@@ -8,10 +8,13 @@ import { marked } from 'marked';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { inflate } from 'pako';
+import { db, configured as firebaseConfigured, PRESENTER_KEY } from './firebase';
+import { ref as dbRef, set as dbSet, onValue } from 'firebase/database';
 
 function TraceViewer() {
   // Parse URL params
-  const urlParams = new URLSearchParams(window.location.search)
+  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search)
   const defaultTrace = `${import.meta.env.BASE_URL}var/traces/lecture_linear_classification.json.gz`;
   const tracePath = urlParams.get('trace') || defaultTrace;  // JSON file that has everything
   const targetSourcePath = urlParams.get('source');  // Source file to display
@@ -19,7 +22,14 @@ function TraceViewer() {
   const targetStepIndex = parseInt(urlParams.get('step')) || null;  // Step index to highlight
   const rawMode = urlParams.get('raw');
   const animateMode = urlParams.get('animate');
+  const syncMode = urlParams.get('mode');        // 'presenter' | 'audience' | null
+  const sessionId = urlParams.get('session') || 'default';
+  const presenterKeyMatch = urlParams.get('key') === PRESENTER_KEY;
+  const isPresenter = syncMode === 'presenter' && presenterKeyMatch;
+  const isAudience = syncMode === 'audience';
   const navigate = useNavigate();
+  // stepToSync is safe to reference in hooks (computed before any early returns)
+  const stepToSync = targetStepIndex ?? 0;
 
   const [error, setError] = useState(null);
   const [trace, setTrace] = useState(null);
@@ -61,6 +71,7 @@ function TraceViewer() {
     }
 
     const handleKeyDown = (event) => {
+      if (isAudience) return;  // Audience is locked to presenter
       if (event.altKey || event.ctrlKey) {  // Don't capture alt-right (for web page navigation)
         return;
       }
@@ -93,8 +104,38 @@ function TraceViewer() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [trace, targetStepIndex, targetLineNumber, rawMode, animateMode, navigate]);
+  }, [trace, targetStepIndex, targetLineNumber, rawMode, animateMode, navigate, isAudience]);
 
+  // Presenter: push current step index to Firebase whenever it changes
+  useEffect(() => {
+    if (!isPresenter || !db) return;
+    console.log('[Presenter] writing step →', stepToSync);
+    dbSet(dbRef(db, `sessions/${sessionId}/step`), stepToSync)
+      .then(() => console.log('[Presenter] write OK'))
+      .catch(e => console.error('[Presenter] write FAILED', e));
+  }, [isPresenter, sessionId, stepToSync]);
+
+  // Audience: subscribe to Firebase and navigate to whatever step the presenter is on
+  useEffect(() => {
+    if (!isAudience || !db) return;
+    console.log('[Audience] subscribing to session:', sessionId);
+    const stepRef = dbRef(db, `sessions/${sessionId}/step`);
+    const unsubscribe = onValue(stepRef, (snapshot) => {
+      const step = snapshot.val();
+      console.log('[Audience] received step →', step);
+      if (step !== null) {
+        updateUrlParams({ step, source: null, line: null }, navigate);
+      }
+    }, (error) => console.error('[Audience] subscribe error', error));
+    return () => unsubscribe();
+  }, [isAudience, sessionId, navigate]);
+
+  // Audience: lock page scroll
+  useEffect(() => {
+    if (!isAudience) return;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [isAudience]);
 
   // Not ready
   if (!tracePath) {
@@ -142,10 +183,21 @@ function TraceViewer() {
   }
 
   const renderedEnv = currentStepIndex !== null ? renderEnv({trace, currentStepIndex}) : null;
-  const renderedLines = renderLines({trace, currentPath, currentLineNumber, currentStepIndex, targetStepIndex, rawMode, animateMode, navigate});
+  const renderedLines = renderLines({trace, currentPath, currentLineNumber, currentStepIndex, targetStepIndex, rawMode, animateMode, navigate, isPresenter, isAudience, sessionId});
+
+  const syncWarning = (isPresenter || isAudience) && !firebaseConfigured && (
+    <div style={{
+      background: '#fff3cd', color: '#856404', border: '1px solid #ffc107',
+      padding: '8px 14px', fontSize: '13px', fontFamily: 'sans-serif',
+    }}>
+      ⚠️ Sync mode requires Firebase. Open <code>src/firebase.js</code> and fill in your Firebase config.
+      See <a href="https://console.firebase.google.com/" target="_blank">console.firebase.google.com</a> to create a free project.
+    </div>
+  );
 
   return (
     <div className="trace-viewer-container">
+      {syncWarning}
       <div className="lines-panel">{renderedLines}</div>
       <div className="env-panel">
         {renderedEnv}
@@ -428,7 +480,7 @@ function computeStringContentLines(fileContents) {
   return result;
 }
 
-function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, targetStepIndex, rawMode, animateMode, navigate}) {
+function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, targetStepIndex, rawMode, animateMode, navigate, isPresenter, isAudience, sessionId}) {
   const linesToShow = computeLinesToShow({trace, currentStepIndex});
 
   // Build a map of line number to renderings
@@ -480,7 +532,8 @@ function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, t
       <span
         key={0}
         className="line-number code-container"
-        onClick={() => gotoLine({trace, currentPath, currentLineNumber, currentStepIndex, lineNumber, navigate})}
+        onClick={isAudience ? undefined : () => gotoLine({trace, currentPath, currentLineNumber, currentStepIndex, lineNumber, navigate})}
+        style={isAudience ? { cursor: 'default' } : undefined}
       >
         {lineNumber}
       </span>
@@ -515,22 +568,40 @@ function renderLines({trace, currentPath, currentLineNumber, currentStepIndex, t
   const stepOverBackwardIcon = "↖️";
   const stepOverForwardIcon = "↗️";
   const stepUpIcon = "⤴️";
+  const navDisabled = isAudience;
   const buttons = (
     <span className="icon-buttons">
-      <button title="Toggle animation (whether to gradually show content when stepping through) [shortcut: A]" onClick={() => toggleAnimateMode({animateMode, navigate})}>{animateIcon}</button>
-      <button title="Toggle raw mode (whether to show the underlying code) [shortcut: R]" onClick={() => toggleRawMode({rawMode, navigate})}>{rawIcon}</button>
-      <button title="Step backward (into functions if necessary) [shortcut: h or left]" onClick={() => stepBackward({currentStepIndex, navigate})}>{stepBackwardIcon}</button>
-      <button title="Step forward (into functions if necessary) [shortcut: l or right]" onClick={() => stepForward({trace, currentStepIndex, navigate})}>{stepForwardIcon}</button>
-      <button title="Step over backward (stay at this level of the stack) [shortcut: k or shift-left]" onClick={() => stepOverBackward({trace, currentStepIndex, navigate})}>{stepOverBackwardIcon}</button>
-      <button title="Step over forward (stay at this level of the stack) [shortcut: j or shift-right]" onClick={() => stepOverForward({trace, currentStepIndex, navigate})}>{stepOverForwardIcon}</button>
-      <button title="Step forward until we're out of this function [shortcut: u]" onClick={() => stepUp({trace, currentStepIndex, navigate})}>{stepUpIcon}</button>
+      <button title="Toggle animation [shortcut: A]" onClick={() => toggleAnimateMode({animateMode, navigate})} disabled={navDisabled}>{animateIcon}</button>
+      <button title="Toggle raw mode [shortcut: R]" onClick={() => toggleRawMode({rawMode, navigate})} disabled={navDisabled}>{rawIcon}</button>
+      <button title="Step backward [shortcut: h or left]" onClick={() => stepBackward({currentStepIndex, navigate})} disabled={navDisabled}>{stepBackwardIcon}</button>
+      <button title="Step forward [shortcut: l or right]" onClick={() => stepForward({trace, currentStepIndex, navigate})} disabled={navDisabled}>{stepForwardIcon}</button>
+      <button title="Step over backward [shortcut: k or shift-left]" onClick={() => stepOverBackward({trace, currentStepIndex, navigate})} disabled={navDisabled}>{stepOverBackwardIcon}</button>
+      <button title="Step over forward [shortcut: j or shift-right]" onClick={() => stepOverForward({trace, currentStepIndex, navigate})} disabled={navDisabled}>{stepOverForwardIcon}</button>
+      <button title="Step forward until out of this function [shortcut: u]" onClick={() => stepUp({trace, currentStepIndex, navigate})} disabled={navDisabled}>{stepUpIcon}</button>
     </span>
-  )
+  );
+
+  const syncBadge = (isPresenter || isAudience) && (
+    <span style={{
+      marginLeft: '10px',
+      padding: '2px 8px',
+      borderRadius: '4px',
+      fontSize: '12px',
+      fontWeight: 'bold',
+      background: isPresenter ? '#d4edda' : '#cce5ff',
+      color: isPresenter ? '#155724' : '#004085',
+      border: `1px solid ${isPresenter ? '#c3e6cb' : '#b8daff'}`,
+      fontFamily: 'sans-serif',
+    }}>
+      {isPresenter ? `📡 Presenter` : `👁 Audience`}
+    </span>
+  );
 
   const header = (
     <div className="header">
       <div className="header-title">
         <span>{currentPath}</span>
+        {syncBadge}
         {buttons}
       </div>
       {makeProgressBar(currentStepIndex, trace.steps.length)}
